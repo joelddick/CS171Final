@@ -1,10 +1,40 @@
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 
 public class CommThread extends Thread{
+	
+	public List<String> log;
+	private ServerSocket serverSocket;
+	private int port = 5000;
+	
 	public CommThread(){
-		
+		try{
+			serverSocket = new ServerSocket(port);
+		}
+		catch (IOException e){
+			System.out.println(e.toString());
+		}
+		log = Collections.synchronizedList(new ArrayList<String>());
 	}
 	
 	public void run(){
-		
+		Socket s = null;
+		while (true){
+			try{
+				 s = serverSocket.accept();
+			}
+			catch(IOException e){
+				System.out.println(e.toString());
+			}
+			if(s != null){
+				new Thread(new HandlerThread(this, s)).start();
+			}
+			s = null;
+		}
 	}
 }
