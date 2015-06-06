@@ -3,16 +3,17 @@ public class Paxos {
 
 	private int[] 	ballotNum = {0,0}; 
 	private String 	msg;
-	private int 		myVal;
+	private int 	myVal;
 	private int		numAcks = 0;
 	private int[]	ackedAcceptBal = {0, 0}; 	// (balNum, balNumId). Store highest received ballot
 	private int		ackedAcceptVal = -1;		// and corresponding ackVal.
 	
 	private int[] 	acceptNum = {0,0};
-	private int 		acceptVal = -1; // Initialize to -1 because 0 is location in log
-	private int 		numAccept2s = 0;
+	private int 	acceptVal = -1; // Initialize to -1 because 0 is location in log
+	private int 	numAccept2s = 0;
 	
 	private int		siteId;
+	private int 	leader;
 	
 	
 	public Paxos(int v, String m, int si) {
@@ -20,6 +21,14 @@ public class Paxos {
 		msg = m;
 		siteId = si;
 		ballotNum[1] = siteId;
+	}
+	
+	public synchronized boolean amLeader(){
+		return siteId == leader;
+	}
+	
+	public synchronized int getLeader(){
+		return leader;
 	}
 	
 	public synchronized boolean beginPhaseOne() {
@@ -50,9 +59,8 @@ public class Paxos {
 	/*
 	 * Leader's perspective.
 	 */
-	public synchronized void sendFirstAccept() {
-		// TODO: After receiving majority acks, broadcast accept1
-		// message with ballotNum and myVal
+	public synchronized String firstAcceptMessage() {
+		return "accept1," + ballotNum[0] + "," + ballotNum[1] + "," + myVal;
 	}
 	
 	/*

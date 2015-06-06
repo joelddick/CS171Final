@@ -59,33 +59,7 @@ public class HandlerThread extends Thread {
 			leftover = leftover.substring(input.indexOf(",") + 1);
 			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
 			String msg = leftover.substring(input.indexOf(",") + 1);
-			
-			// Get next available position in OUR log.
-			int nextPosition;
-			synchronized(parentThread.log) {
-				nextPosition = parentThread.log.size();
-			}
-			
-			// Create new Paxos object with nextPosition and this msg.
-			parentThread.p.myVal = nextPosition;
-			parentThread.p.msg = msg;
-			parentThread.p.ballotNum[1] = siteId; // TODO: Figure out a way to communicate the siteId across classes.
-			
-			/*
-			 * TODO: Deal with this section later...
-			 *
-			boolean won = p.start();
-			if(won) {
-				write(ip, port, msg);
-				// TODO: Notify initiator success.
-			}
-			
-			else {
-				// TODO: Notify initiator that it failed.
-			}
-			 *
-			 * End Todo from above.
-			 */
+			post(ip, port, msg);
 		}
 		
 		// ackMsg = {ack ip port balnum balnumid acceptBalNum acceptBalNumId}
@@ -136,7 +110,7 @@ public class HandlerThread extends Thread {
 			}
 		}
 		
-		// rcvMsg = accept1 ip port balNum balId val
+		// rcvMsg = accept1,balNum,balId,val
 		else if(input.substring(0, 7).equals("accept1")){
 			int[] recvBallotNum = {0,0};
 			recvBallotNum[0] = Integer.parseInt(recvMsg[3]);
@@ -179,7 +153,7 @@ public class HandlerThread extends Thread {
 	
 	private synchronized void read(String ip, Integer port) throws IOException{
 		Socket s = new Socket(ip, port);
-		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
+		PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
 		
 		for(int i = 0; i < parentThread.log.size(); i++){
 			socketOut.println(parentThread.log.get(i));
@@ -189,16 +163,35 @@ public class HandlerThread extends Thread {
 		s.close();
 	}
 	
-	private synchronized void write(String ip, Integer port, String msg) throws IOException{
-		Socket s = new Socket(ip, port);
-		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
-		
-		int i = parentThread.log.size();
-		parentThread.log.add(msg);
-		
-		socketOut.println("Success: " + i);
-		
-		socketOut.close();
-		s.close();
+	private synchronized void post(String ipAddress, Integer port, String message) throws IOException{
+
+		boolean amLeader = false;
+		synchronized(parentThread.p){
+			amLeader = parentThread.p.amLeader();
+		}
+
+		if(amLeader){
+			sendFirstAccept();
+		}
+		else{
+			int leader = parentThread.p.getLeader();
+			Socket s = new Socket(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader));
+			PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
+
+			socketOut.println("Post," + ipAddress + "," + port.toString() + "," + message);
+
+			// TODO: If timeout then start election.
+		}
+	}
+	
+	private void sendFirstAccept() throws IOException{
+		for(int i = 0; i < 5; i++){
+			Socket s = new Socket(Globals.siteIpAddresses.get(i), Globals.sitePorts.get(i));
+			PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
+
+			synchronized(parentThread.p){
+				socketOut.println(parentThread.p.firstAcceptMessage());
+			}
+		}
 	}
 }

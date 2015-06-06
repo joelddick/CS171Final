@@ -8,10 +8,10 @@ import java.util.List;
 
 public class CommThread extends Thread{
 	
-	public static List<String> log;
-	public static boolean leader;
+	public List<String> log;
+	public boolean leader;
 //	public static List<Paxos> paxies;
-	public static Paxos p;
+	public Paxos p;
 	
 	private ServerSocket serverSocket;
 	private int port = 5000;
