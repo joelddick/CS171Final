@@ -33,12 +33,14 @@ public class SiteProcess{
 		}
 		if (input.substring(0, 4).equals("Fail")){
 			if(!failing){
+				System.out.println("Failing...");
 				failing = true;
 				myComm.wait();
 			}
 		}
 		else if (input.substring(0, 7).equals("Restore")){
 			if(failing){
+				System.out.println("Restoring...");
 				failing = false;
 				myComm.notify();
 			}

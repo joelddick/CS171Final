@@ -8,7 +8,11 @@ import java.util.List;
 
 public class CommThread extends Thread{
 	
-	public List<String> log;
+	public static List<String> log;
+	public static boolean leader;
+//	public static List<Paxos> paxies;
+	public static Paxos p;
+	
 	private ServerSocket serverSocket;
 	private int port = 5000;
 	
@@ -19,6 +23,9 @@ public class CommThread extends Thread{
 		catch (IOException e){
 			System.out.println(e.toString());
 		}
+		
+		p = new Paxos(0, null, 0); // populate in handler thread after receiving "post" if leader
+		leader = false;
 		log = Collections.synchronizedList(new ArrayList<String>());
 	}
 	

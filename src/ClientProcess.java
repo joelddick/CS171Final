@@ -32,7 +32,7 @@ public class ClientProcess {
 		}
 		catch(IOException e){
 			System.out.println(e.toString());
-		}
+		}	
 	}
 
 	private void processInput(String input) throws IOException{
