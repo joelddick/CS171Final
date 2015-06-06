@@ -60,11 +60,7 @@ public class HandlerThread extends Thread {
 			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
 			String msg = leftover.substring(input.indexOf(",") + 1);
 			
-			// Get next available position in OUR log.
-			int nextPosition;
-			synchronized(parentThread.log) {
-				nextPosition = parentThread.log.size();
-			}
+			
 		}
 		
 		else if(input.substring(0, 7).equals("prepare")){
