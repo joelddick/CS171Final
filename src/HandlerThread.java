@@ -139,18 +139,6 @@ public class HandlerThread extends Thread {
 		}
 	}
 	
-	// Compares two ballot numbers in the form of int arrays
-	// Returns true if left > right.
-	public boolean isGreater(int b1[], int b2[]) {
-		return ( b1[0]>b2[0] || (b1[0]==b2[0] && b1[1]>b2[1]));
-	}
-	
-	// Checks to see if ballot numbers are in fact the same
-	// and matching
-	public boolean sameBallot(int b1[], int b2[]) {
-		return ( b1[0]==b2[0]  &&  b1[1]==b2[1] );
-	}
-	
 	private synchronized void read(String ip, Integer port) throws IOException{
 		Socket s = new Socket(ip, port);
 		PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
