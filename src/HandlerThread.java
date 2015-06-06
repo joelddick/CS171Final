@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Scanner;
 
 
@@ -68,10 +69,12 @@ public class HandlerThread extends Thread {
 			recvBallotNum[1] = Integer.parseInt(input.substring(9,10));
 			System.out.println("prepare's ballot nums: " + recvBallotNum[0] + " " + recvBallotNum[1]);
 			
-			boolean returnAck = parentThread.p.checkPrepare(recvBallotNum);
-			if(returnAck) {
-				// TODO: Send ack back to leader, telling him about latest 
-				// accepted value and what ballot was accepted in.
+			synchronized (parentThread.p) {
+				boolean returnAck = parentThread.p.checkPrepare(recvBallotNum);
+				if(returnAck) {
+					// TODO: Send ack back to leader, telling him about latest 
+					// accepted value and what ballot was accepted in.
+				}
 			}
 		}
 		
@@ -82,9 +85,11 @@ public class HandlerThread extends Thread {
 			int recvAcceptBallot[] = {Integer.parseInt(ackMsg[5]), Integer.parseInt(ackMsg[6])};
 			int recvAcceptVal = Integer.parseInt(ackMsg[7]);
 			
-			boolean send = parentThread.p.handleAck(recvBallotNum, recvAcceptVal, recvAcceptBallot); 
-			if(send) {
-				// TODO: Send accepts
+			synchronized (parentThread.p) {
+				boolean send = parentThread.p.handleAck(recvBallotNum, recvAcceptVal, recvAcceptBallot); 
+				if(send) {
+					// TODO: Send accepts
+				}
 			}
 		}
 		
@@ -95,11 +100,14 @@ public class HandlerThread extends Thread {
 			recvBallotNum[1] = Integer.parseInt(recvMsg[4]);
 			int recvVal = Integer.parseInt(recvMsg[5]);
 			
-			boolean send2 = parentThread.p.handleAccept1(recvBallotNum, recvVal);
-			if(send2) {
-				// TODO: Send accept2s out
-				// Only send if recvBal>ourBal ????
+			synchronized (parentThread.p) {
+				boolean send2 = parentThread.p.handleAccept1(recvBallotNum, recvVal);
+				if(send2) {
+					// TODO: Send accept2s out
+					// Only send if recvBal>ourBal ????
+				}
 			}
+			
 		}
 		
 		else if(input.substring(0, 7).equals("accept2")){
@@ -136,7 +144,11 @@ public class HandlerThread extends Thread {
 		}
 
 		if(amLeader){
-			sendFirstAccept();
+			String msg = null;
+			synchronized(parentThread.p) {
+				msg = parentThread.p.firstAcceptMessage();
+			}
+			broadcast(msg);
 		}
 		else{
 			int leader = parentThread.p.getLeader();
@@ -146,6 +158,16 @@ public class HandlerThread extends Thread {
 			socketOut.println("Post," + ipAddress + "," + port.toString() + "," + message);
 
 			// TODO: If timeout then start election.
+		}
+	}
+	
+	
+	private void broadcast(String msg) throws UnknownHostException, IOException {
+		for(int i = 0; i < 5; i++){
+			Socket s = new Socket(Globals.siteIpAddresses.get(i), Globals.sitePorts.get(i));
+			PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
+
+			socketOut.println(msg);
 		}
 	}
 	
