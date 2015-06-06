@@ -59,8 +59,7 @@ public class HandlerThread extends Thread {
 			leftover = leftover.substring(input.indexOf(",") + 1);
 			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
 			String msg = leftover.substring(input.indexOf(",") + 1);
-			
-			
+			post(ip, port, msg);
 		}
 		
 		else if(input.substring(0, 7).equals("prepare")){
@@ -117,8 +116,6 @@ public class HandlerThread extends Thread {
 		}
 	}
 	
-	
-	
 	private synchronized void read(String ip, Integer port) throws IOException{
 		Socket s = new Socket(ip, port);
 		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
@@ -131,16 +128,38 @@ public class HandlerThread extends Thread {
 		s.close();
 	}
 	
-	private synchronized void write(String ip, Integer port, String msg) throws IOException{
-		Socket s = new Socket(ip, port);
-		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
-		
-		int i = parentThread.log.size();
-		parentThread.log.add(msg);
-		
-		socketOut.println("Success: " + i);
-		
-		socketOut.close();
-		s.close();
+	private synchronized void post(String ipAddress, Integer port, String message) throws IOException{
+
+		boolean amLeader = false;
+		synchronized(parentThread.p){
+			amLeader = parentThread.p.amLeader();
+		}
+
+		if(amLeader){
+			sendFirstAccept();
+		}
+		else{
+			int leader = parentThread.p.getLeader();
+			Socket s = new Socket(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader));
+			PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
+
+			socketOut.println("Post," + ipAddress + "," + port.toString() + "," + message);
+
+			// TODO: If timeout then start election.
+		}
 	}
+	
+	private void sendFirstAccept() throws IOException{
+		for(int i = 0; i < 5; i++){
+			Socket s = new Socket(Globals.siteIpAddresses.get(i), Globals.sitePorts.get(i));
+			PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
+
+			synchronized(parentThread.p){
+				socketOut.println(parentThread.p.firstAcceptMessage());
+			}
+		}
+	}
+	
+	
+	
 }
