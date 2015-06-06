@@ -1,18 +1,19 @@
 
 public class Paxos {
 
+	public int QUORUM = 3;
+	
 	private int[] 	ballotNum = {0,0}; 
 	private String 	msg;
 	private int 	myVal;
 	private int		numAcks = 0;
 	private int[]	ackedAcceptBal = {0, 0}; 	// (balNum, balNumId). Store highest received ballot
 	private int		ackedAcceptVal = -1;		// and corresponding ackVal.
-	
 	private int[] 	acceptNum = {0,0};
 	private int 	acceptVal = -1; // Initialize to -1 because 0 is location in log
 	private int 	numAccept2s = 0;
-	
 	private int		siteId;
+
 	private int 	leader;
 	
 	
