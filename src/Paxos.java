@@ -117,22 +117,24 @@ public class Paxos {
 	/*
 	 * Returns true to let handler thread know to broadcast accept2s.
 	 */
-	public synchronized boolean handleAccept1(int[] recvBallotNum, int recvVal) {
+	public synchronized boolean handleAccept1(int[] recvBallotNum, int recvVal, String message) {
 		System.out.println("handleAccept1 	" + recvBallotNum[0] + " " + recvBallotNum[1] + " " + recvVal);
 		if(isGreater(recvBallotNum, this.ballotNum) || sameBallot(recvBallotNum, this.ballotNum)) {
 			this.acceptNum[0] = recvBallotNum[0];
 			this.acceptNum[1] = recvBallotNum[1];
 			this.acceptVal = recvVal;
+			this.msg = message;
 			return true;
 		}
 		return false;
 	}
 	
-	public synchronized boolean handleAccept2(int[] recvBallotNum, int recvVal) {
+	public synchronized boolean handleAccept2(int[] recvBallotNum, int recvVal, String message) {
 		System.out.println("handleAccept2 	" + recvBallotNum[0] + " " + recvBallotNum[1] + " " + recvVal);
 		acceptNum[0] = recvBallotNum[0];
 		acceptNum[1] = recvBallotNum[1];
 		acceptVal = recvVal;
+		this.msg = message;
 		this.numAccept2s++;
 		System.out.println("handleAccept2 numAccept2s: " + numAccept2s);
 		if(this.numAccept2s == QUORUM) {
