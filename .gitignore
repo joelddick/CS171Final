@@ -4,3 +4,9 @@ bin/*
 deploy.cpp
 
 deployconifg
+
+deploy
+
+deploy.cpp
+
+deployconfig.cpp
