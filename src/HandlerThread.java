@@ -105,17 +105,18 @@ public class HandlerThread extends Thread {
 			}
 		}
 		
-		// rcvMsg = accept1,balNum,balId,val
+		// rcvMsg = accept1,balNum,balId,val,msg
 		else if(input.substring(0, 7).equals("accept1")){
 			System.out.println("HandlerThread received accept1");
 			int[] recvBallotNum = {0,0};
 			recvBallotNum[0] = Integer.parseInt(recvMsg[1]);
 			recvBallotNum[1] = Integer.parseInt(recvMsg[2]);
 			int recvVal = Integer.parseInt(recvMsg[3]);
+			String message = recvMsg[4];
 			
 			boolean send2 = false;
 			synchronized (parentThread.p) {
-				send2 = parentThread.p.handleAccept1(recvBallotNum, recvVal);
+				send2 = parentThread.p.handleAccept1(recvBallotNum, recvVal, message);
 			}
 			if(send2) {
 				String msg = null;
@@ -137,7 +138,7 @@ public class HandlerThread extends Thread {
 			
 			boolean decide = false;
 			synchronized (parentThread) {
-				decide = parentThread.p.handleAccept2(recvBallotNum, recvVal); 
+				decide = parentThread.p.handleAccept2(recvBallotNum, recvVal, msg); 
 				if(decide) {
 					if(parentThread.p.amLeader()){
 						Socket s = new Socket(parentThread.p.currentIp, parentThread.p.currentPort);
@@ -148,7 +149,7 @@ public class HandlerThread extends Thread {
 						socketOut.close();
 						s.close();
 					}
-					System.out.println("Adding: " + parentThread.p.msg + " " + recvVal);
+					System.out.println("Adding: " + msg + " " + recvVal);
 					parentThread.log.add(recvVal, msg);
 					parentThread.p.doneDeciding();
 				}
