@@ -131,14 +131,16 @@ public class Paxos {
 	
 	public synchronized boolean handleAccept2(int[] recvBallotNum, int recvVal, String message) {
 		System.out.println("handleAccept2 	" + recvBallotNum[0] + " " + recvBallotNum[1] + " " + recvVal);
-		acceptNum[0] = recvBallotNum[0];
-		acceptNum[1] = recvBallotNum[1];
-		acceptVal = recvVal;
-		this.msg = message;
-		this.numAccept2s++;
-		System.out.println("handleAccept2 numAccept2s: " + numAccept2s);
-		if(this.numAccept2s == QUORUM) {
-			return true;
+		if(recvVal == myVal) {
+			acceptNum[0] = recvBallotNum[0];
+			acceptNum[1] = recvBallotNum[1];
+			acceptVal = recvVal;
+			this.msg = message;
+			this.numAccept2s++;
+			System.out.println("handleAccept2 numAccept2s: " + numAccept2s);
+			if(this.numAccept2s == QUORUM) {
+				return true;
+			}
 		}
 		
 		return false;
