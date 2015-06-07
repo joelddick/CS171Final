@@ -90,7 +90,11 @@ public class ClientProcess {
 		}
 
 		
-		response.add(socketIn.nextLine());
+		String blog = socketIn.nextLine();
+		String[] posts = blog.split(",");
+		for(String post : posts) {
+			response.add(post);
+		}
 		
 
 		socketIn.close();
