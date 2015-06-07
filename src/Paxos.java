@@ -14,11 +14,8 @@ public class Paxos {
 	private int 	acceptVal = -1; // Initialize to -1 because 0 is location in log
 	private int 	numAccept2s = 0;
 	private int		siteId;
-
 	private int 	leader;
-	
 	private boolean isDeciding = false;
-	
 	private String ipAddress;
 	private int port;
 	
@@ -28,6 +25,23 @@ public class Paxos {
 		msg = m;
 		siteId = si;
 		ballotNum[1] = siteId;
+	}
+	
+	public synchronized void reset() {
+		ballotNum[0] = 0;
+		ballotNum[1] = 1;
+		msg = null;
+//		msgId = -1;
+		myVal = -1;
+		numAcks = 0;
+		ackedAcceptBal[0] = 0;
+		ackedAcceptBal[1] = 0;
+		acceptNum[0] = 0;
+		acceptNum[1] = 0;
+		acceptVal = -1;
+		numAccept2s = 0;
+		isDeciding = false;
+		
 	}
 	
 	public synchronized boolean beginPhaseOne() {
@@ -46,6 +60,14 @@ public class Paxos {
 	 */
 	public synchronized void sendPrepare() {
 		// TODO: Broadcast prepare messages to all
+	}
+	
+	// prepare siteNum balNum balId
+	public synchronized String getPrepareMsg() {
+		 String msg = Globals.mySiteId + "," +
+			ballotNum[0] + "," + 
+			ballotNum[1];
+		 return msg;
 	}
 	
 	/*
@@ -71,7 +93,7 @@ public class Paxos {
 	 * accept1. Else it returns false to tell handler thread to either
 	 * keep waiting for more acks, or just to ignore it.
 	 */
-	public synchronized boolean handleAck(int[] recvBallotNum, int recvAcceptVal, int[] recvAcceptBallot) {
+	public synchronized boolean handleAck(int[] recvBallotNum, int[] recvAcceptBallot, int recvAcceptVal) {
 		if(sameBallot(recvBallotNum, this.ballotNum)) {
 			// This ack is in fact a response to my proposal. Simple check.
 			if(this.numAcks < QUORUM) {
@@ -97,7 +119,7 @@ public class Paxos {
 	 * Returns true to let handler thread know to broadcast accept2s.
 	 */
 	public synchronized boolean handleAccept1(int[] recvBallotNum, int recvVal) {
-		if(isGreater(recvBallotNum, this.ballotNum)) {
+		if(isGreater(recvBallotNum, this.ballotNum) || sameBallot(recvBallotNum, this.ballotNum)) {
 			this.acceptNum[0] = recvBallotNum[0];
 			this.acceptNum[1] = recvBallotNum[1];
 			this.acceptVal = recvVal;
@@ -173,6 +195,7 @@ public class Paxos {
 	}
 	
 	public synchronized String decideMessage() {
+		// TODO: What exactly is msgId?? It's never set anywhere...
 		return "decide," + msgId + "," + msg;
 	}
 	
