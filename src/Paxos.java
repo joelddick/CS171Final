@@ -197,4 +197,9 @@ public class Paxos {
 		return isDeciding;
 	}
 	
+	public synchronized void doneDeciding(){
+		isDeciding = false;
+		myVal++;
+	}
+	
 }

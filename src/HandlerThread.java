@@ -24,6 +24,8 @@ public class HandlerThread extends Thread {
 				input = socketIn.nextLine();
 			}
 			if (input == null){
+				socketIn.close();
+				socket.close();
 				return;
 			}
 			processInput(input);
@@ -125,6 +127,7 @@ public class HandlerThread extends Thread {
 				decide = parentThread.p.handleAccept2(recvBallotNum, recvVal); 
 				if(decide) {
 					parentThread.log.add(recvVal, msg);
+					parentThread.p.doneDeciding();
 				}
 			}
 		}
@@ -216,6 +219,9 @@ public class HandlerThread extends Thread {
 			PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
 
 			socketOut.println(msg);
+			
+			socketOut.close();
+			s.close();
 		}
 	}
 }
