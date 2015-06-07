@@ -75,7 +75,7 @@ public class HandlerThread extends Thread {
 			}
 		}
 		
-		// ackMsg = {ack ip port balnum balnumid acceptBalNum acceptBalNumId}
+		// ackMsg = {ack siteId balnum balnumid acceptBalNum acceptBalNumId}
 		else if(input.substring(0, 3).equals("ack")) {
 			String[] ackMsg = input.split(" ");
 			int recvBallotNum[] = {Integer.parseInt(ackMsg[3]), Integer.parseInt(ackMsg[4])};

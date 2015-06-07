@@ -64,7 +64,8 @@ public class Paxos {
 	
 	// prepare siteNum balNum balId
 	public synchronized String getPrepareMsg() {
-		 String msg = Globals.mySiteId + "," +
+		 String msg = "prepare," + 
+			Globals.mySiteId + "," +
 			ballotNum[0] + "," + 
 			ballotNum[1];
 		 return msg;
