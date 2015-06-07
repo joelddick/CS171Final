@@ -75,12 +75,12 @@ public class HandlerThread extends Thread {
 			}
 		}
 		
-		// ackMsg = {ack ip port balnum balnumid acceptBalNum acceptBalNumId}
+		// ackMsg = {ack balnum balnumid acceptBalNum acceptBalNumId}
 		else if(input.substring(0, 3).equals("ack")) {
 			String[] ackMsg = input.split(" ");
-			int recvBallotNum[] = {Integer.parseInt(ackMsg[3]), Integer.parseInt(ackMsg[4])};
-			int recvAcceptBallot[] = {Integer.parseInt(ackMsg[5]), Integer.parseInt(ackMsg[6])};
-			int recvAcceptVal = Integer.parseInt(ackMsg[7]);
+			int recvBallotNum[] = {Integer.parseInt(ackMsg[1]), Integer.parseInt(ackMsg[2])};
+			int recvAcceptBallot[] = {Integer.parseInt(ackMsg[3]), Integer.parseInt(ackMsg[4])};
+			int recvAcceptVal = Integer.parseInt(ackMsg[5]);
 			
 			synchronized (parentThread.p) {
 				boolean send = parentThread.p.handleAck(recvBallotNum, recvAcceptBallot, recvAcceptVal); 
@@ -197,6 +197,7 @@ public class HandlerThread extends Thread {
 			// TODO: Add the timeout stuff...
 			String prepareMsg = null;
 			synchronized(parentThread.p) {
+				parentThread.p.startPrepare();
 				prepareMsg = parentThread.p.getPrepareMsg();
 			}
 			broadcast(prepareMsg);

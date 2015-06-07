@@ -70,6 +70,11 @@ public class Paxos {
 		 return msg;
 	}
 	
+	public synchronized void startPrepare(){
+		this.ballotNum[0]++;
+		this.ballotNum[1] = Globals.mySiteId;
+	}
+	
 	/*
 	 *  Check prepare returns true if recvBallotNum > this.ballotNum
 	 *  letting HandlerThread know to proceed with protocol and send
