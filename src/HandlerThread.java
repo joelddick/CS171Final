@@ -112,24 +112,21 @@ public class HandlerThread extends Thread {
 			}
 		}
 		
-		// rcvMsg = accept2,balNum,balId,val
+		// rcvMsg = accept2,balNum,balId,val,msg
 		else if(input.substring(0, 7).equals("accept2")){
 			int[] recvBallotNum = {0,0};
 			recvBallotNum[0] = Integer.parseInt(recvMsg[1]);
 			recvBallotNum[1] = Integer.parseInt(recvMsg[2]);
 			int recvVal = Integer.parseInt(recvMsg[3]);
+			String msg = recvMsg[4];
 			
 			boolean decide = false;
-			synchronized (parentThread.p) {
+			synchronized (parentThread) {
 				decide = parentThread.p.handleAccept2(recvBallotNum, recvVal); 
-			}
-			if(decide) {
-				String msg = null;
-				synchronized(parentThread.p) {
-					msg = parentThread.p.decideMessage();
+				if(decide) {
+					parentThread.log.add(recvVal, msg);
 				}
-				broadcast(msg);
-			}	
+			}
 		}
 		
 		else if(recvMsg[0].equals("decide")) {

@@ -189,19 +189,14 @@ public class Paxos {
 	 * Happens once when leader accepts new value.
 	 */
 	public synchronized String firstAcceptMessage() {
-		return "accept1," + ballotNum[0] + "," + ballotNum[1] + "," + myVal;
+		return "accept1," + ballotNum[0] + "," + ballotNum[1] + "," + myVal + "," + msg;
 	}
 	
 	/*
 	 * Happens any time you get an accept1.
 	 */
 	public synchronized String secondAcceptMessage() {
-		return "accept2," + ballotNum[0] + "," + ballotNum[1] + "," + myVal;
-	}
-	
-	public synchronized String decideMessage() {
-		// TODO: What exactly is msgId?? It's never set anywhere...
-		return "decide," + msgId + "," + msg;
+		return "accept2," + ballotNum[0] + "," + ballotNum[1] + "," + myVal + "," + msg;
 	}
 	
 	public synchronized void prepPost(String ipAddress, Integer port, String message){
