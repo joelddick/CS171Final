@@ -4,9 +4,8 @@ public class Paxos {
 	public int QUORUM = 3;
 	
 	private int[] 	ballotNum = {0,0}; 
-	private String 	msg;
-	private int 	msgId;
-	private int 	myVal;
+	private String 	msg = null;
+	private int 	myVal = 0;
 	private int		numAcks = 0;
 	private int[]	ackedAcceptBal = {0, 0}; 	// (balNum, balNumId). Store highest received ballot
 	private int		ackedAcceptVal = -1;		// and corresponding ackVal.
@@ -16,16 +15,6 @@ public class Paxos {
 	private int		siteId;
 	private int 	leader;
 	private boolean isDeciding = false;
-	private String ipAddress;
-	private int port;
-	
-	
-	public Paxos(int v, String m, int si) {
-		myVal = v;
-		msg = m;
-		siteId = si;
-		ballotNum[1] = siteId;
-	}
 	
 	public synchronized void reset() {
 		ballotNum[0] = 0;
@@ -204,8 +193,6 @@ public class Paxos {
 	
 	public synchronized void prepPost(String ipAddress, Integer port, String message){
 		isDeciding = true;
-		this.ipAddress = ipAddress;
-		this.port = port;
 		msg = message;
 	}
 	
