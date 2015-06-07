@@ -48,9 +48,10 @@ public class ClientProcess {
 		} else if (command.equals("Read")) {
 			read();
 			List<String> response = myWait();
-			for (int i = 0; i < response.size(); i++) {
-				System.out.println(response);
-			}
+			System.out.println(response.get(0));
+//			for (int i = 0; i < response.size(); i++) {
+//				System.out.println(response);
+//			}
 		}
 	}
 
@@ -83,6 +84,10 @@ public class ClientProcess {
 		Scanner socketIn = new Scanner(socket.getInputStream());
 
 		ArrayList<String> response = new ArrayList<String>();
+		
+		while (!socketIn.hasNext()) {
+			// Wait
+		}
 
 		while (socketIn.hasNext()) {
 			response.add(socketIn.nextLine());
