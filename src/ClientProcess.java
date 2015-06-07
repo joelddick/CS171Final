@@ -105,13 +105,13 @@ public class ClientProcess {
 		String path = "config.txt";
 		FileReader fr = new FileReader(path);
 		BufferedReader br = new BufferedReader(fr);
-		int myID = Integer.parseInt(br.readLine());
 		
-		String site1 = br.readLine();
-		String site2 = br.readLine();
-		String site3 = br.readLine();
-		String site4 = br.readLine();
-		String site5 = br.readLine();
+		int myID = Integer.parseInt(br.readLine());		// line 1
+		String site1 = br.readLine();					// line 2
+		String site2 = br.readLine();					// line 3
+		String site3 = br.readLine();					// line 4
+		String site4 = br.readLine();					// line 5
+		String site5 = br.readLine();					// line 6
 
 
 		site1 = site1.substring(0, site1.indexOf(' '));
