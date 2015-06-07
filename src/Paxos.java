@@ -114,6 +114,17 @@ public class Paxos {
 		return false;
 	}
 	
+	// ack balNum, balId, acceptBalNum, acceptBalId, acceptVal
+		public synchronized String getAckMsg() {
+			String msg = "ack," + 
+				ballotNum[0] + "," +  	// balNum
+				ballotNum[1] + "," +	// balId
+				acceptNum[0] + "," +	// acceptBalNum
+				acceptNum[1] + "," +	// acceptBalId
+				acceptVal;	
+			return msg;
+		}
+	
 	// Compares two ballot numbers in the form of int arrays
 	// Returns true if left > right.
 	public boolean isGreater(int b1[], int b2[]) {

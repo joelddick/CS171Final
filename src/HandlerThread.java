@@ -66,6 +66,13 @@ public class HandlerThread extends Thread {
 				if(returnAck) {
 					// TODO: Send ack back to leader, telling him about latest 
 					// accepted value and what ballot was accepted in.
+					
+					// ack balNum, balId, acceptBalNum, acceptBalId, acceptVal
+					int fromSiteId = Integer.parseInt(recvMsg[1]);
+					String ackMsg = parentThread.p.getAckMsg();
+					String ip = Globals.siteIpAddresses.get(fromSiteId);
+					int port = Globals.sitePorts.get(fromSiteId);
+					sendTo(ackMsg, ip, port);
 				}
 			}
 		}
@@ -162,16 +169,32 @@ public class HandlerThread extends Thread {
 			}
 		}
 		else{
-			int leader = parentThread.p.getLeader();
-			Socket s = new Socket(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader));
-			PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
-
-			socketOut.println("Post," + ipAddress + "," + port.toString() + "," + message);
+			int leader = -1;
+			synchronized(parentThread.p) {
+				leader = parentThread.p.getLeader();
+			}
+			if(leader != -1) {
+				Socket s = new Socket(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader));
+				PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
+	
+				socketOut.println("Post," + ipAddress + "," + port.toString() + "," + message);
+				socketOut.close();
+				s.close();
+			}
 
 			// TODO: If timeout then start election.
+			// prepare siteNum balNum balId
 		}
 	}
 	
+	private void sendTo(String msg, String ip, int port) throws UnknownHostException, IOException {
+		Socket s = new Socket(ip, port);
+		PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
+		
+		socketOut.println(msg);
+		socketOut.close();
+		s.close();
+	}
 	
 	private void broadcast(String msg) throws UnknownHostException, IOException {
 		for(int i = 0; i < 5; i++){
