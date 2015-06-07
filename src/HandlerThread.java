@@ -36,16 +36,8 @@ public class HandlerThread extends Thread {
 	}
 	
 	private void processInput(String input) throws IOException{
-		
-		/*
-		 * ASSUME ALL MESSAGES START WITH:
-		 * msgType sourceIp sourcePort
-		 */
-		String[] recvMsg = input.split(" ");
+		String[] recvMsg = input.split(",");
 		String cmd = recvMsg[0];
-		String sourceIp = recvMsg[1];
-		int sourcePort = Integer.parseInt(recvMsg[2]);
-		
 		
 		if(input.substring(0, 4).equals("Read")){
 			String leftover = input.substring(input.indexOf(",") + 1);
@@ -93,32 +85,40 @@ public class HandlerThread extends Thread {
 			}
 		}
 		
-		// rcvMsg = accept1 ip port balNum balId val
+		// rcvMsg = accept1,balNum,balId,val
 		else if(input.substring(0, 7).equals("accept1")){
 			int[] recvBallotNum = {0,0};
-			recvBallotNum[0] = Integer.parseInt(recvMsg[3]);
-			recvBallotNum[1] = Integer.parseInt(recvMsg[4]);
-			int recvVal = Integer.parseInt(recvMsg[5]);
+			recvBallotNum[0] = Integer.parseInt(recvMsg[1]);
+			recvBallotNum[1] = Integer.parseInt(recvMsg[2]);
+			int recvVal = Integer.parseInt(recvMsg[3]);
 			
 			synchronized (parentThread.p) {
 				boolean send2 = parentThread.p.handleAccept1(recvBallotNum, recvVal);
 				if(send2) {
-					// TODO: Send accept2s out
-					// Only send if recvBal>ourBal ????
+					String msg = null;
+					synchronized(parentThread.p) {
+						msg = parentThread.p.secondAcceptMessage();
+					}
+					broadcast(msg);
 				}
 			}
 			
 		}
 		
+		// rcvMsg = accept2,balNum,balId,val
 		else if(input.substring(0, 7).equals("accept2")){
 			int[] recvBallotNum = {0,0};
-			recvBallotNum[0] = Integer.parseInt(recvMsg[3]);
-			recvBallotNum[1] = Integer.parseInt(recvMsg[4]);
-			int recvVal = Integer.parseInt(recvMsg[5]);
+			recvBallotNum[0] = Integer.parseInt(recvMsg[1]);
+			recvBallotNum[1] = Integer.parseInt(recvMsg[2]);
+			int recvVal = Integer.parseInt(recvMsg[3]);
 			
 			boolean decide = parentThread.p.handleAccept2(recvBallotNum, recvVal);
 			if(decide) {
-				// TODO: Decide on this value.
+				String msg = null;
+				synchronized(parentThread.p) {
+					msg = parentThread.p.decideMessage();
+				}
+				broadcast(msg);
 			}
 			
 		}
@@ -139,16 +139,27 @@ public class HandlerThread extends Thread {
 	private synchronized void post(String ipAddress, Integer port, String message) throws IOException{
 
 		boolean amLeader = false;
+		boolean isDeciding = true;
 		synchronized(parentThread.p){
 			amLeader = parentThread.p.amLeader();
+			isDeciding = parentThread.p.isDeciding();
 		}
 
 		if(amLeader){
-			String msg = null;
-			synchronized(parentThread.p) {
-				msg = parentThread.p.firstAcceptMessage();
+			if(!isDeciding){
+				String msg = null;
+				synchronized(parentThread.p) {
+					parentThread.p.prepPost(ipAddress, port, message);
+					msg = parentThread.p.firstAcceptMessage();
+				}
+				broadcast(msg);
 			}
-			broadcast(msg);
+			else{
+				Socket s = new Socket(ipAddress, port);
+				PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
+				
+				socketOut.println("Post Failed. Please try again.");
+			}
 		}
 		else{
 			int leader = parentThread.p.getLeader();
@@ -170,18 +181,4 @@ public class HandlerThread extends Thread {
 			socketOut.println(msg);
 		}
 	}
-	
-	private void sendFirstAccept() throws IOException{
-		for(int i = 0; i < 5; i++){
-			Socket s = new Socket(Globals.siteIpAddresses.get(i), Globals.sitePorts.get(i));
-			PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
-
-			synchronized(parentThread.p){
-				socketOut.println(parentThread.p.firstAcceptMessage());
-			}
-		}
-	}
-	
-	
-	
 }

@@ -5,6 +5,7 @@ public class Paxos {
 	
 	private int[] 	ballotNum = {0,0}; 
 	private String 	msg;
+	private int 	msgId;
 	private int 	myVal;
 	private int		numAcks = 0;
 	private int[]	ackedAcceptBal = {0, 0}; 	// (balNum, balNumId). Store highest received ballot
@@ -15,6 +16,11 @@ public class Paxos {
 	private int		siteId;
 
 	private int 	leader;
+	
+	private boolean isDeciding = false;
+	
+	private String ipAddress;
+	private int port;
 	
 	
 	public Paxos(int v, String m, int si) {
@@ -142,17 +148,32 @@ public class Paxos {
 	}
 	
 	/*
-	 * Leader's perspective.
+	 * Happens once when leader accepts new value.
 	 */
 	public synchronized String firstAcceptMessage() {
 		return "accept1," + ballotNum[0] + "," + ballotNum[1] + "," + myVal;
 	}
 	
 	/*
-	 * Everyone's perspective.
+	 * Happens any time you get an accept1.
 	 */
-	public synchronized void sendSecondAccept() {
-		// TODO: Broadcast accept2 with ballotNum and val to all
+	public synchronized String secondAcceptMessage() {
+		return "accept2," + ballotNum[0] + "," + ballotNum[1] + "," + myVal;
+	}
+	
+	public synchronized String decideMessage() {
+		return "decide," + msgId + "," + msg;
+	}
+	
+	public synchronized void prepPost(String ipAddress, Integer port, String message){
+		isDeciding = true;
+		this.ipAddress = ipAddress;
+		this.port = port;
+		msg = message;
+	}
+	
+	public synchronized boolean isDeciding(){
+		return isDeciding;
 	}
 	
 }
