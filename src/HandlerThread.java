@@ -166,8 +166,11 @@ public class HandlerThread extends Thread {
 		Socket s = new Socket(ip, port);
 		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
 		
-		for(int i = 0; i < parentThread.log.size(); i++){
-			socketOut.println(parentThread.log.get(i));
+		synchronized(parentThread){
+			for(int i = 0; i < parentThread.log.size(); i++){
+				System.out.println(parentThread.log.get(i));
+				socketOut.println(parentThread.log.get(i));
+			}
 		}
 		
 		socketOut.close();
