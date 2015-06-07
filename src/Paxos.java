@@ -134,6 +134,7 @@ public class Paxos {
 		acceptNum[1] = recvBallotNum[1];
 		acceptVal = recvVal;
 		this.numAccept2s++;
+		System.out.println("handleAccept2 numAccept2s: " + numAccept2s);
 		if(this.numAccept2s == QUORUM) {
 			return true;
 		}
