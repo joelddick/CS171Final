@@ -47,6 +47,7 @@ public class ClientProcess {
 			System.out.println(response.get(0));
 		} else if (command.equals("Read")) {
 			read();
+			System.out.println("Waiting for Read");
 			List<String> response = myWait();
 			System.out.println(response.get(0));
 //			for (int i = 0; i < response.size(); i++) {
@@ -80,10 +81,13 @@ public class ClientProcess {
 
 	private ArrayList<String> myWait() throws IOException {
 		serverSocket = new ServerSocket(port);
+		System.out.println("Waiting for accept.");
 		Socket socket = serverSocket.accept();
 		Scanner socketIn = new Scanner(socket.getInputStream());
 
 		ArrayList<String> response = new ArrayList<String>();
+		
+		System.out.println("Accepted but waiting for something");
 		
 		while (!socketIn.hasNext()) {
 			// Wait
