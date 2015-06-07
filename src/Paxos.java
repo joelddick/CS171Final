@@ -23,20 +23,15 @@ public class Paxos {
 	}
 	
 	public synchronized void reset() {
-		ballotNum[0] = 0;
-		ballotNum[1] = 1;
 		msg = null;
-//		msgId = -1;
-		myVal = -1;
 		numAcks = 0;
-		ackedAcceptBal[0] = 0;
-		ackedAcceptBal[1] = 0;
+		ackedAcceptBal[0] = -1;
+		ackedAcceptBal[1] = -1;
 		acceptNum[0] = 0;
 		acceptNum[1] = 0;
 		acceptVal = -1;
 		numAccept2s = 0;
 		isDeciding = false;
-		
 	}
 	
 	public synchronized boolean beginPhaseOne() {
@@ -218,8 +213,8 @@ public class Paxos {
 	}
 	
 	public synchronized void doneDeciding(){
-		isDeciding = false;
 		myVal++;
+		reset();
 	}
 	
 }
