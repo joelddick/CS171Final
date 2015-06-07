@@ -18,6 +18,10 @@ public class Paxos {
 	public String currentIp;
 	public Integer currentPort;
 	
+	public Paxos(){
+		siteId = Globals.mySiteId;
+	}
+	
 	public synchronized void reset() {
 		ballotNum[0] = 0;
 		ballotNum[1] = 1;
