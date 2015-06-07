@@ -99,6 +99,7 @@ public class Paxos {
 					if(isGreater(recvAcceptBallot, this.ackedAcceptBal)) {
 						this.ackedAcceptBal = recvAcceptBallot;
 						this.ackedAcceptVal = recvAcceptVal;
+						this.myVal = ackedAcceptVal;
 					}
 				}
 				this.numAcks++;
