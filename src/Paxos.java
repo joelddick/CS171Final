@@ -64,7 +64,8 @@ public class Paxos {
 	
 	// prepare siteNum balNum balId
 	public synchronized String getPrepareMsg() {
-		 String msg = Globals.mySiteId + "," +
+		 String msg = "prepare," + 
+			Globals.mySiteId + "," +
 			ballotNum[0] + "," + 
 			ballotNum[1];
 		 return msg;
@@ -81,7 +82,7 @@ public class Paxos {
 	 *  and ack to source.
 	 */
 	public synchronized boolean checkPrepare(int[] recvBallotNum) {
-		if(isGreater(recvBallotNum, this.ballotNum)) {
+		if(isGreater(recvBallotNum, this.ballotNum) || sameBallot(recvBallotNum, this.ballotNum)) {
 			// This is a higher ballot than my current, join it.
 			this.ballotNum[0] = recvBallotNum[0];
 			this.ballotNum[1] = recvBallotNum[1];
@@ -134,9 +135,11 @@ public class Paxos {
 	}
 	
 	public synchronized boolean handleAccept2(int[] recvBallotNum, int recvVal) {
-		this.numAccept2s++;
-		if(this.numAccept2s == QUORUM) {
-			return true;
+		if(sameBallot(acceptNum, recvBallotNum) && acceptVal==recvVal) {
+			this.numAccept2s++;
+			if(this.numAccept2s == QUORUM) {
+				return true;
+			}
 		}
 		return false;
 	}
