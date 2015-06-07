@@ -84,7 +84,9 @@ public class HandlerThread extends Thread {
 			synchronized (parentThread.p) {
 				boolean send = parentThread.p.handleAck(recvBallotNum, recvAcceptVal, recvAcceptBallot); 
 				if(send) {
-					// TODO: Send accepts
+					// accept ballotNum ballotId myval
+					String acceptMsg = parentThread.p.firstAcceptMessage();
+					broadcast(acceptMsg);
 				}
 			}
 		}
@@ -101,12 +103,13 @@ public class HandlerThread extends Thread {
 				if(send2) {
 					String msg = null;
 					synchronized(parentThread.p) {
+						// TODO: Do we need this second synchronized block if
+						// we already place it at the beginning of this block?
 						msg = parentThread.p.secondAcceptMessage();
 					}
 					broadcast(msg);
 				}
 			}
-			
 		}
 		
 		// rcvMsg = accept2,balNum,balId,val
