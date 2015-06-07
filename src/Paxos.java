@@ -57,6 +57,7 @@ public class Paxos {
 			Globals.mySiteId + "," +
 			ballotNum[0] + "," + 
 			ballotNum[1];
+		 System.out.println("getPrepareMsg " + msg);
 		 return msg;
 	}
 	
@@ -89,6 +90,7 @@ public class Paxos {
 	 * keep waiting for more acks, or just to ignore it.
 	 */
 	public synchronized boolean handleAck(int[] recvBallotNum, int[] recvAcceptBallot, int recvAcceptVal) {
+		System.out.println("handleAck 		" + recvBallotNum[0] + " " + recvBallotNum[1] + " " + recvAcceptBallot[0] + " " + recvAcceptBallot[1] + " " + recvAcceptVal);
 		if(sameBallot(recvBallotNum, this.ballotNum)) {
 			// This ack is in fact a response to my proposal. Simple check.
 			if(this.numAcks < QUORUM) {
@@ -115,6 +117,7 @@ public class Paxos {
 	 * Returns true to let handler thread know to broadcast accept2s.
 	 */
 	public synchronized boolean handleAccept1(int[] recvBallotNum, int recvVal) {
+		System.out.println("handleAccept1 	" + recvBallotNum[0] + " " + recvBallotNum[1] + " " + recvVal);
 		if(isGreater(recvBallotNum, this.ballotNum) || sameBallot(recvBallotNum, this.ballotNum)) {
 			this.acceptNum[0] = recvBallotNum[0];
 			this.acceptNum[1] = recvBallotNum[1];
@@ -125,6 +128,7 @@ public class Paxos {
 	}
 	
 	public synchronized boolean handleAccept2(int[] recvBallotNum, int recvVal) {
+		System.out.println("handleAccept2 	" + recvBallotNum[0] + " " + recvBallotNum[1] + " " + recvVal);
 		if(sameBallot(acceptNum, recvBallotNum) && acceptVal==recvVal) {
 			this.numAccept2s++;
 			if(this.numAccept2s == QUORUM) {
@@ -142,6 +146,7 @@ public class Paxos {
 			acceptNum[0] + "," +	// acceptBalNum
 			acceptNum[1] + "," +	// acceptBalId
 			acceptVal;	
+		System.out.println("getAckMsg " + msg);
 		return msg;
 	}
 	

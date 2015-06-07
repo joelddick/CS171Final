@@ -42,6 +42,7 @@ public class HandlerThread extends Thread {
 		String cmd = recvMsg[0];
 		
 		if(input.substring(0, 4).equals("Read")) {
+			System.out.println("HandlerThread received Read");
 			String leftover = input.substring(input.indexOf(",") + 1);
 			String ip = input.substring(0, leftover.indexOf(","));
 			leftover = leftover.substring(input.indexOf(",") + 1);
@@ -49,6 +50,7 @@ public class HandlerThread extends Thread {
 			read(ip, port);
 		}
 		else if(input.substring(0, 4).equals("Post")) {
+			System.out.println("HandlerThread received Post");
 			String leftover = input.substring(input.indexOf(",") + 1);
 			String ip = input.substring(0, leftover.indexOf(","));
 			leftover = leftover.substring(input.indexOf(",") + 1);
@@ -59,6 +61,7 @@ public class HandlerThread extends Thread {
 		
 		// prepare siteNum balNum balId
 		else if(input.substring(0, 7).equals("prepare")) {
+			System.out.println("HandlerThread received prepare");
 			int[] recvBallotNum = {0,0};
 			recvBallotNum[0] = Integer.parseInt(recvMsg[2]);
 			recvBallotNum[1] = Integer.parseInt(recvMsg[3]);
@@ -79,6 +82,7 @@ public class HandlerThread extends Thread {
 		
 		// ackMsg = {ack balnum balnumid acceptBalNum acceptBalNumId}
 		else if(input.substring(0, 3).equals("ack")) {
+			System.out.println("HandlerThread received ack");
 			String[] ackMsg = input.split(" ");
 			int recvBallotNum[] = {Integer.parseInt(ackMsg[1]), Integer.parseInt(ackMsg[2])};
 			int recvAcceptBallot[] = {Integer.parseInt(ackMsg[3]), Integer.parseInt(ackMsg[4])};
@@ -96,6 +100,7 @@ public class HandlerThread extends Thread {
 		
 		// rcvMsg = accept1,balNum,balId,val
 		else if(input.substring(0, 7).equals("accept1")){
+			System.out.println("HandlerThread received accept1");
 			int[] recvBallotNum = {0,0};
 			recvBallotNum[0] = Integer.parseInt(recvMsg[1]);
 			recvBallotNum[1] = Integer.parseInt(recvMsg[2]);
@@ -116,6 +121,7 @@ public class HandlerThread extends Thread {
 		
 		// rcvMsg = accept2,balNum,balId,val,msg
 		else if(input.substring(0, 7).equals("accept2")){
+			System.out.println("HandlerThread received accept2");
 			int[] recvBallotNum = {0,0};
 			recvBallotNum[0] = Integer.parseInt(recvMsg[1]);
 			recvBallotNum[1] = Integer.parseInt(recvMsg[2]);
@@ -140,6 +146,7 @@ public class HandlerThread extends Thread {
 	}
 	
 	private synchronized void read(String ip, Integer port) throws IOException{
+		System.out.println("HandlerThread read");
 		Socket s = new Socket(ip, port);
 		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
 		
@@ -152,7 +159,7 @@ public class HandlerThread extends Thread {
 	}
 	
 	private synchronized void post(String ipAddress, Integer port, String message) throws IOException{
-
+		System.out.println("HandlerThread post");
 		boolean amLeader = false;
 		boolean isDeciding = true;
 		synchronized(parentThread.p){
@@ -205,6 +212,7 @@ public class HandlerThread extends Thread {
 	}
 	
 	private void sendTo(String msg, String ip, int port) throws UnknownHostException, IOException {
+		System.out.println("HandlerThread sendTo " + msg);
 		Socket s = new Socket(ip, port);
 		PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
 		
@@ -214,6 +222,7 @@ public class HandlerThread extends Thread {
 	}
 	
 	private void broadcast(String msg) throws UnknownHostException, IOException {
+		System.out.println("HandlerThread broadcast " + msg);
 		for(int i = 0; i < 5; i++){
 			Socket s = new Socket(Globals.siteIpAddresses.get(i), Globals.sitePorts.get(i));
 			PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
