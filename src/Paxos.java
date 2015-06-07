@@ -4,7 +4,7 @@ public class Paxos {
 	public int QUORUM = 3;
 	
 	private int[] 	ballotNum = {0,0}; 
-	private String 	msg = null;
+	public String 	msg = null;
 	private int 	myVal = 0;
 	private int		numAcks = 0;
 	private int[]	ackedAcceptBal = {0, 0}; 	// (balNum, balNumId). Store highest received ballot

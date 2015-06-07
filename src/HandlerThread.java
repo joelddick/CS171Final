@@ -148,6 +148,7 @@ public class HandlerThread extends Thread {
 						socketOut.close();
 						s.close();
 					}
+					System.out.println("Adding: " + parentThread.p.msg + " " + recvVal);
 					parentThread.log.add(recvVal, msg);
 					parentThread.p.doneDeciding();
 				}
