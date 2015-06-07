@@ -76,7 +76,7 @@ public class Paxos {
 	 *  and ack to source.
 	 */
 	public synchronized boolean checkPrepare(int[] recvBallotNum) {
-		if(isGreater(recvBallotNum, this.ballotNum)) {
+		if(isGreater(recvBallotNum, this.ballotNum) || sameBallot(recvBallotNum, this.ballotNum)) {
 			// This is a higher ballot than my current, join it.
 			this.ballotNum[0] = recvBallotNum[0];
 			this.ballotNum[1] = recvBallotNum[1];
