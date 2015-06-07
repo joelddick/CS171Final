@@ -166,7 +166,7 @@ public class HandlerThread extends Thread {
 	private synchronized void read(String ip, Integer port) throws IOException{
 		System.out.println("HandlerThread read");
 		Socket s = new Socket(ip, port);
-		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
+		PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
 		
 		String readMsg = "";
 		
