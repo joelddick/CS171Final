@@ -23,7 +23,7 @@ public class CommThread extends Thread{
 			System.out.println(e.toString());
 		}
 		
-		p = new Paxos(0, null, 0); // populate in handler thread after receiving "post" if leader
+		p = new Paxos(); // populate in handler thread after receiving "post" if leader
 		leader = false;
 		log = Collections.synchronizedList(new ArrayList<String>());
 	}
