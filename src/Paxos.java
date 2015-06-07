@@ -129,9 +129,11 @@ public class Paxos {
 	}
 	
 	public synchronized boolean handleAccept2(int[] recvBallotNum, int recvVal) {
-		this.numAccept2s++;
-		if(this.numAccept2s == QUORUM) {
-			return true;
+		if(sameBallot(acceptNum, recvBallotNum) && acceptVal==recvVal) {
+			this.numAccept2s++;
+			if(this.numAccept2s == QUORUM) {
+				return true;
+			}
 		}
 		return false;
 	}
