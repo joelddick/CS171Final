@@ -55,10 +55,11 @@ public class HandlerThread extends Thread {
 			post(ip, port, msg);
 		}
 		
+		// prepare siteNum balNum balId
 		else if(input.substring(0, 7).equals("prepare")) {
 			int[] recvBallotNum = {0,0};
-			recvBallotNum[0] = Integer.parseInt(input.substring(8,9));
-			recvBallotNum[1] = Integer.parseInt(input.substring(9,10));
+			recvBallotNum[0] = Integer.parseInt(recvMsg[2]);
+			recvBallotNum[1] = Integer.parseInt(recvMsg[3]);
 			System.out.println("prepare's ballot nums: " + recvBallotNum[0] + " " + recvBallotNum[1]);
 			
 			synchronized (parentThread.p) {
@@ -82,7 +83,7 @@ public class HandlerThread extends Thread {
 			int recvAcceptVal = Integer.parseInt(ackMsg[7]);
 			
 			synchronized (parentThread.p) {
-				boolean send = parentThread.p.handleAck(recvBallotNum, recvAcceptVal, recvAcceptBallot); 
+				boolean send = parentThread.p.handleAck(recvBallotNum, recvAcceptBallot, recvAcceptVal); 
 				if(send) {
 					// accept ballotNum ballotId myval
 					String acceptMsg = parentThread.p.firstAcceptMessage();
@@ -98,17 +99,16 @@ public class HandlerThread extends Thread {
 			recvBallotNum[1] = Integer.parseInt(recvMsg[2]);
 			int recvVal = Integer.parseInt(recvMsg[3]);
 			
+			boolean send2 = false;
 			synchronized (parentThread.p) {
-				boolean send2 = parentThread.p.handleAccept1(recvBallotNum, recvVal);
-				if(send2) {
-					String msg = null;
-					synchronized(parentThread.p) {
-						// TODO: Do we need this second synchronized block if
-						// we already place it at the beginning of this block?
-						msg = parentThread.p.secondAcceptMessage();
-					}
-					broadcast(msg);
+				send2 = parentThread.p.handleAccept1(recvBallotNum, recvVal);
+			}
+			if(send2) {
+				String msg = null;
+				synchronized(parentThread.p) {
+					msg = parentThread.p.secondAcceptMessage();
 				}
+				if(msg != null) { broadcast(msg); }
 			}
 		}
 		
@@ -119,15 +119,23 @@ public class HandlerThread extends Thread {
 			recvBallotNum[1] = Integer.parseInt(recvMsg[2]);
 			int recvVal = Integer.parseInt(recvMsg[3]);
 			
-			boolean decide = parentThread.p.handleAccept2(recvBallotNum, recvVal);
+			boolean decide = false;
+			synchronized (parentThread.p) {
+				decide = parentThread.p.handleAccept2(recvBallotNum, recvVal); 
+			}
 			if(decide) {
 				String msg = null;
 				synchronized(parentThread.p) {
 					msg = parentThread.p.decideMessage();
 				}
 				broadcast(msg);
-			}
-			
+			}	
+		}
+		
+		else if(recvMsg[0].equals("decide")) {
+			// TODO: decide on this value, add to log, reset Paxos variables.
+			// TODO: Do we want to check for majority of decides? or as soon
+			// as we get one decide message.
 		}
 	}
 	
@@ -166,6 +174,8 @@ public class HandlerThread extends Thread {
 				PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
 				
 				socketOut.println("Post Failed. Please try again.");
+				socketOut.close();
+				s.close();
 			}
 		}
 		else{
@@ -184,6 +194,12 @@ public class HandlerThread extends Thread {
 
 			// TODO: If timeout then start election.
 			// prepare siteNum balNum balId
+			// TODO: Add the timeout stuff...
+			String prepareMsg = null;
+			synchronized(parentThread.p) {
+				prepareMsg = parentThread.p.getPrepareMsg();
+			}
+			broadcast(prepareMsg);
 		}
 	}
 	
