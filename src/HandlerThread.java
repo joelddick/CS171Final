@@ -35,18 +35,18 @@ public class HandlerThread extends Thread {
 		}
 	}
 	
-	private void processInput(String input) throws IOException{
+	private void processInput(String input) throws IOException {
 		String[] recvMsg = input.split(",");
 		String cmd = recvMsg[0];
 		
-		if(input.substring(0, 4).equals("Read")){
+		if(input.substring(0, 4).equals("Read")) {
 			String leftover = input.substring(input.indexOf(",") + 1);
 			String ip = input.substring(0, leftover.indexOf(","));
 			leftover = leftover.substring(input.indexOf(",") + 1);
 			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
 			read(ip, port);
 		}
-		else if(input.substring(0, 4).equals("Post")){
+		else if(input.substring(0, 4).equals("Post")) {
 			String leftover = input.substring(input.indexOf(",") + 1);
 			String ip = input.substring(0, leftover.indexOf(","));
 			leftover = leftover.substring(input.indexOf(",") + 1);
@@ -55,7 +55,7 @@ public class HandlerThread extends Thread {
 			post(ip, port, msg);
 		}
 		
-		else if(input.substring(0, 7).equals("prepare")){
+		else if(input.substring(0, 7).equals("prepare")) {
 			int[] recvBallotNum = {0,0};
 			recvBallotNum[0] = Integer.parseInt(input.substring(8,9));
 			recvBallotNum[1] = Integer.parseInt(input.substring(9,10));
@@ -64,9 +64,6 @@ public class HandlerThread extends Thread {
 			synchronized (parentThread.p) {
 				boolean returnAck = parentThread.p.checkPrepare(recvBallotNum);
 				if(returnAck) {
-					// TODO: Send ack back to leader, telling him about latest 
-					// accepted value and what ballot was accepted in.
-					
 					// ack balNum, balId, acceptBalNum, acceptBalId, acceptVal
 					int fromSiteId = Integer.parseInt(recvMsg[1]);
 					String ackMsg = parentThread.p.getAckMsg();
