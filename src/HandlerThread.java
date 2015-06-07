@@ -174,7 +174,7 @@ public class HandlerThread extends Thread {
 			for(int i = 0; i < parentThread.log.size(); i++){
 				System.out.println(parentThread.log.get(i));
 				//socketOut.println(parentThread.log.get(i));
-				readMsg += i + " " + parentThread.log.get(i) + "\n";
+				readMsg += i + " " + parentThread.log.get(i) + ",";
 			}
 		}
 		System.out.println("Sending Read msg as: " + readMsg);

@@ -89,9 +89,9 @@ public class ClientProcess {
 			// Wait
 		}
 
-		while (socketIn.hasNext()) {
-			response.add(socketIn.nextLine());
-		}
+		
+		response.add(socketIn.nextLine());
+		
 
 		socketIn.close();
 		socket.close();
