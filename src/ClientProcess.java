@@ -49,10 +49,10 @@ public class ClientProcess {
 			read();
 			System.out.println("Waiting for Read");
 			List<String> response = myWait();
-			System.out.println(response.get(0));
-//			for (int i = 0; i < response.size(); i++) {
-//				System.out.println(response);
-//			}
+//			System.out.println(response.get(0));
+			for (int i = 0; i < response.size(); i++) {
+				System.out.println(response);
+			}
 		}
 	}
 
