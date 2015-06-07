@@ -168,13 +168,16 @@ public class HandlerThread extends Thread {
 		Socket s = new Socket(ip, port);
 		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
 		
+		String readMsg = "";
+		
 		synchronized(parentThread){
 			for(int i = 0; i < parentThread.log.size(); i++){
 				System.out.println(parentThread.log.get(i));
-				socketOut.println(parentThread.log.get(i));
+				//socketOut.println(parentThread.log.get(i));
+				readMsg += i + " " + parentThread.log.get(i) + "\n";
 			}
 		}
-		
+		socketOut.println(readMsg);
 		socketOut.close();
 		s.close();
 	}
