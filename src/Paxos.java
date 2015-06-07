@@ -15,6 +15,8 @@ public class Paxos {
 	private int		siteId;
 	private int 	leader;
 	private boolean isDeciding = false;
+	public String currentIp;
+	public Integer currentPort;
 	
 	public synchronized void reset() {
 		ballotNum[0] = 0;
@@ -200,6 +202,9 @@ public class Paxos {
 	}
 	
 	public synchronized void prepPost(String ipAddress, Integer port, String message){
+		currentIp = ipAddress;
+		currentPort = port;
+		
 		isDeciding = true;
 		msg = message;
 	}

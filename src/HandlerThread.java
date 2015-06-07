@@ -43,19 +43,26 @@ public class HandlerThread extends Thread {
 		
 		if(input.substring(0, 4).equals("Read")) {
 			System.out.println("HandlerThread received Read");
-			String leftover = input.substring(input.indexOf(",") + 1);
-			String ip = input.substring(0, leftover.indexOf(","));
-			leftover = leftover.substring(input.indexOf(",") + 1);
-			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
+//			String leftover = input.substring(input.indexOf(",") + 1);
+//			String ip = input.substring(0, leftover.indexOf(","));
+//			leftover = leftover.substring(input.indexOf(",") + 1);
+//			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
+			String ip = recvMsg[1];
+			Integer port = Integer.valueOf(recvMsg[2]);
 			read(ip, port);
 		}
 		else if(input.substring(0, 4).equals("Post")) {
 			System.out.println("HandlerThread received Post");
-			String leftover = input.substring(input.indexOf(",") + 1);
-			String ip = input.substring(0, leftover.indexOf(","));
-			leftover = leftover.substring(input.indexOf(",") + 1);
-			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
-			String msg = leftover.substring(input.indexOf(",") + 1);
+//			String leftover = input.substring(input.indexOf(",") + 1);
+//			String ip = input.substring(0, leftover.indexOf(","));
+//			leftover = leftover.substring(input.indexOf(",") + 1);
+//			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
+//			String msg = leftover.substring(input.indexOf(",") + 1);
+			
+			String ip = recvMsg[1];
+			Integer port = Integer.valueOf(recvMsg[2]);
+			String msg = recvMsg[3];
+			
 			post(ip, port, msg);
 		}
 		
@@ -132,6 +139,15 @@ public class HandlerThread extends Thread {
 			synchronized (parentThread) {
 				decide = parentThread.p.handleAccept2(recvBallotNum, recvVal); 
 				if(decide) {
+					if(parentThread.p.amLeader()){
+						Socket s = new Socket(parentThread.p.currentIp, parentThread.p.currentPort);
+						PrintWriter socketOut = new PrintWriter(s.getOutputStream());
+						
+						socketOut.println("Post Successful!");
+						
+						socketOut.close();
+						s.close();
+					}
 					parentThread.log.add(recvVal, msg);
 					parentThread.p.doneDeciding();
 				}

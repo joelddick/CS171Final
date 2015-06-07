@@ -31,11 +31,11 @@ public class Deploy {
 		String site5 = br.readLine();					// line 6
 
 
-		site1 = site1.substring(0, site1.indexOf(' '));
-		site2 = site2.substring(0, site2.indexOf(' '));
-		site3 = site3.substring(0, site3.indexOf(' '));
-		site4 = site4.substring(0, site4.indexOf(' '));
-		site5 = site5.substring(0, site5.indexOf(' '));
+		String site1s = site1.substring(0, site1.indexOf(' '));
+		String site2s = site2.substring(0, site2.indexOf(' '));
+		String site3s = site3.substring(0, site3.indexOf(' '));
+		String site4s = site4.substring(0, site4.indexOf(' '));
+		String site5s = site5.substring(0, site5.indexOf(' '));
 		
 		Integer port1 = Integer.valueOf(site1.substring(site1.indexOf(' ')+1));
 		Integer port2 = Integer.valueOf(site2.substring(site2.indexOf(' ')+1));
@@ -48,11 +48,11 @@ public class Deploy {
 		
 		// Set globals
 		Globals.mySiteId = myID;
-		Globals.siteIpAddresses.add(site1);
-		Globals.siteIpAddresses.add(site2);
-		Globals.siteIpAddresses.add(site3);
-		Globals.siteIpAddresses.add(site4);
-		Globals.siteIpAddresses.add(site5);
+		Globals.siteIpAddresses.add(site1s);
+		Globals.siteIpAddresses.add(site2s);
+		Globals.siteIpAddresses.add(site3s);
+		Globals.siteIpAddresses.add(site4s);
+		Globals.siteIpAddresses.add(site5s);
 		Globals.sitePorts.add(port1);
 		Globals.sitePorts.add(port2);
 		Globals.sitePorts.add(port3);
