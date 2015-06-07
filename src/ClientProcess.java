@@ -91,9 +91,15 @@ public class ClientProcess {
 
 		
 		String blog = socketIn.nextLine();
-		String[] posts = blog.split(",");
-		for(String post : posts) {
-			response.add(post);
+		System.out.println("blog is: " + blog);
+		if(blog != null) {
+			String[] posts = blog.split(",");
+			for(String post : posts) {
+				response.add(post);
+			}
+		}
+		else {
+			System.out.println("Blog empty!");
 		}
 		
 
