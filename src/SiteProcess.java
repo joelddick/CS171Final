@@ -55,6 +55,10 @@ public class SiteProcess{
 	
 	private void requestLog() throws IOException {
 		askLeaderForLog(0);
+		askLeaderForLog(1);
+		askLeaderForLog(2);
+		askLeaderForLog(3);
+		askLeaderForLog(4);
 	}
 	
 	private boolean askLeaderForLog(int leader) throws IOException {
