@@ -5,44 +5,50 @@ import java.io.InputStreamReader;
 
 public class SiteProcess{
 	private CommThread myComm;
-	private boolean failing = false;
+	public static boolean failed = false;
 	
 	public SiteProcess(){
 		myComm = new CommThread();
-		myComm.start();
+		synchronized(myComm) {
+			myComm.start();
+		}
 		try{
 			BufferedReader cin = new BufferedReader(new InputStreamReader(System.in));
-			while (true){
+			while (true) {
 				String input = cin.readLine();
-				try{
+				try {
 					processInput(input);
 				}
-				catch (InterruptedException e){
+				catch (InterruptedException e) {
 					System.out.println(e.toString());
 				}
 			}
 		}
-		catch(IOException e){
+		catch(IOException e) {
 			System.out.println(e.toString());
 		}
 	}
 	
-	private void processInput(String input) throws InterruptedException{
-		if (input.length() < 4){
+	private void processInput(String input) throws InterruptedException {
+		if (input.length() < 4) {
 			return;
 		}
-		if (input.substring(0, 4).equals("Fail")){
-			if(!failing){
+		if (input.substring(0, 4).equals("Fail")) {
+			if(!failed){
 				System.out.println("Failing...");
-				failing = true;
-				myComm.wait();
+				failed = true;
+				synchronized(myComm) {
+					myComm.wait();
+				}
 			}
 		}
-		else if (input.substring(0, 7).equals("Restore")){
-			if(failing){
+		else if (input.substring(0, 7).equals("Restore")) {
+			if(failed) {
 				System.out.println("Restoring...");
-				failing = false;
-				myComm.notify();
+				failed = false;
+				synchronized(myComm) {
+					myComm.notify();
+				}
 			}
 		}
 	}

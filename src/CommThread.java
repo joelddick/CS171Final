@@ -30,17 +30,29 @@ public class CommThread extends Thread{
 	
 	public void run(){
 		Socket s = null;
-		while (true){
-			try{
-				 s = serverSocket.accept();
+		while (true) {
+			while(!SiteProcess.failed) {
+				try{
+					 s = serverSocket.accept();
+				}
+				catch(IOException e){
+					System.out.println(e.toString());
+				}
+				if(s != null){
+					if(!SiteProcess.failed){
+						new Thread(new HandlerThread(this, s)).start();
+					}
+					else{
+						try{
+							 s.close();
+						}
+						catch(IOException e){
+							System.out.println(e.toString());
+						}
+					}
+				}
+				s = null;
 			}
-			catch(IOException e){
-				System.out.println(e.toString());
-			}
-			if(s != null){
-				new Thread(new HandlerThread(this, s)).start();
-			}
-			s = null;
 		}
 	}
 }

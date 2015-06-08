@@ -4,7 +4,7 @@ public class Paxos {
 	public int QUORUM = 3;
 	
 	private int[] 	ballotNum = {0,0}; 
-	private String 	msg = null;
+	public String 	msg = null;
 	private int 	myVal = 0;
 	private int		numAcks = 0;
 	private int[]	ackedAcceptBal = {0, 0}; 	// (balNum, balNumId). Store highest received ballot
@@ -15,22 +15,23 @@ public class Paxos {
 	private int		siteId;
 	private int 	leader;
 	private boolean isDeciding = false;
+	public String currentIp;
+	public Integer currentPort;
+	
+	public Paxos(){
+		siteId = Globals.mySiteId;
+	}
 	
 	public synchronized void reset() {
-		ballotNum[0] = 0;
-		ballotNum[1] = 1;
 		msg = null;
-//		msgId = -1;
-		myVal = -1;
 		numAcks = 0;
-		ackedAcceptBal[0] = 0;
-		ackedAcceptBal[1] = 0;
+		ackedAcceptBal[0] = -1;
+		ackedAcceptBal[1] = -1;
 		acceptNum[0] = 0;
 		acceptNum[1] = 0;
 		acceptVal = -1;
 		numAccept2s = 0;
 		isDeciding = false;
-		
 	}
 	
 	public synchronized boolean beginPhaseOne() {
@@ -57,6 +58,7 @@ public class Paxos {
 			Globals.mySiteId + "," +
 			ballotNum[0] + "," + 
 			ballotNum[1];
+		 System.out.println("getPrepareMsg " + msg);
 		 return msg;
 	}
 	
@@ -89,6 +91,7 @@ public class Paxos {
 	 * keep waiting for more acks, or just to ignore it.
 	 */
 	public synchronized boolean handleAck(int[] recvBallotNum, int[] recvAcceptBallot, int recvAcceptVal) {
+		System.out.println("handleAck 		" + recvBallotNum[0] + " " + recvBallotNum[1] + " " + recvAcceptBallot[0] + " " + recvAcceptBallot[1] + " " + recvAcceptVal);
 		if(sameBallot(recvBallotNum, this.ballotNum)) {
 			// This ack is in fact a response to my proposal. Simple check.
 			if(this.numAcks < QUORUM) {
@@ -114,23 +117,32 @@ public class Paxos {
 	/*
 	 * Returns true to let handler thread know to broadcast accept2s.
 	 */
-	public synchronized boolean handleAccept1(int[] recvBallotNum, int recvVal) {
+	public synchronized boolean handleAccept1(int[] recvBallotNum, int recvVal, String message) {
+		System.out.println("handleAccept1 	" + recvBallotNum[0] + " " + recvBallotNum[1] + " " + recvVal);
 		if(isGreater(recvBallotNum, this.ballotNum) || sameBallot(recvBallotNum, this.ballotNum)) {
 			this.acceptNum[0] = recvBallotNum[0];
 			this.acceptNum[1] = recvBallotNum[1];
 			this.acceptVal = recvVal;
+			this.msg = message;
 			return true;
 		}
 		return false;
 	}
 	
-	public synchronized boolean handleAccept2(int[] recvBallotNum, int recvVal) {
-		if(sameBallot(acceptNum, recvBallotNum) && acceptVal==recvVal) {
+	public synchronized boolean handleAccept2(int[] recvBallotNum, int recvVal, String message) {
+		System.out.println("handleAccept2 	" + recvBallotNum[0] + " " + recvBallotNum[1] + " " + recvVal + " " + myVal);
+		if(recvVal == myVal) {
+			acceptNum[0] = recvBallotNum[0];
+			acceptNum[1] = recvBallotNum[1];
+			acceptVal = recvVal;
+			this.msg = message;
 			this.numAccept2s++;
+			System.out.println("handleAccept2 numAccept2s: " + numAccept2s);
 			if(this.numAccept2s == QUORUM) {
 				return true;
 			}
 		}
+		
 		return false;
 	}
 	
@@ -142,6 +154,7 @@ public class Paxos {
 			acceptNum[0] + "," +	// acceptBalNum
 			acceptNum[1] + "," +	// acceptBalId
 			acceptVal;	
+		System.out.println("getAckMsg " + msg);
 		return msg;
 	}
 	
@@ -193,12 +206,20 @@ public class Paxos {
 	}
 	
 	public synchronized void prepPost(String ipAddress, Integer port, String message){
+		currentIp = ipAddress;
+		currentPort = port;
+		
 		isDeciding = true;
 		msg = message;
 	}
 	
 	public synchronized boolean isDeciding(){
 		return isDeciding;
+	}
+	
+	public synchronized void doneDeciding(){
+		myVal++;
+		reset();
 	}
 	
 }

@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
@@ -24,6 +26,8 @@ public class HandlerThread extends Thread {
 				input = socketIn.nextLine();
 			}
 			if (input == null){
+				socketIn.close();
+				socket.close();
 				return;
 			}
 			processInput(input);
@@ -40,23 +44,33 @@ public class HandlerThread extends Thread {
 		String cmd = recvMsg[0];
 		
 		if(input.substring(0, 4).equals("Read")) {
-			String leftover = input.substring(input.indexOf(",") + 1);
-			String ip = input.substring(0, leftover.indexOf(","));
-			leftover = leftover.substring(input.indexOf(",") + 1);
-			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
+			System.out.println("HandlerThread received Read");
+//			String leftover = input.substring(input.indexOf(",") + 1);
+//			String ip = input.substring(0, leftover.indexOf(","));
+//			leftover = leftover.substring(input.indexOf(",") + 1);
+//			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
+			String ip = recvMsg[1];
+			Integer port = Integer.valueOf(recvMsg[2]);
 			read(ip, port);
 		}
 		else if(input.substring(0, 4).equals("Post")) {
-			String leftover = input.substring(input.indexOf(",") + 1);
-			String ip = input.substring(0, leftover.indexOf(","));
-			leftover = leftover.substring(input.indexOf(",") + 1);
-			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
-			String msg = leftover.substring(input.indexOf(",") + 1);
+			System.out.println("HandlerThread received Post");
+//			String leftover = input.substring(input.indexOf(",") + 1);
+//			String ip = input.substring(0, leftover.indexOf(","));
+//			leftover = leftover.substring(input.indexOf(",") + 1);
+//			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
+//			String msg = leftover.substring(input.indexOf(",") + 1);
+			
+			String ip = recvMsg[1];
+			Integer port = Integer.valueOf(recvMsg[2]);
+			String msg = recvMsg[3];
+			
 			post(ip, port, msg);
 		}
 		
 		// prepare siteNum balNum balId
 		else if(input.substring(0, 7).equals("prepare")) {
+			System.out.println("HandlerThread received prepare");
 			int[] recvBallotNum = {0,0};
 			recvBallotNum[0] = Integer.parseInt(recvMsg[2]);
 			recvBallotNum[1] = Integer.parseInt(recvMsg[3]);
@@ -77,6 +91,7 @@ public class HandlerThread extends Thread {
 		
 		// ackMsg = {ack balnum balnumid acceptBalNum acceptBalNumId}
 		else if(input.substring(0, 3).equals("ack")) {
+			System.out.println("HandlerThread received ack");
 			String[] ackMsg = input.split(" ");
 			int recvBallotNum[] = {Integer.parseInt(ackMsg[1]), Integer.parseInt(ackMsg[2])};
 			int recvAcceptBallot[] = {Integer.parseInt(ackMsg[3]), Integer.parseInt(ackMsg[4])};
@@ -92,16 +107,18 @@ public class HandlerThread extends Thread {
 			}
 		}
 		
-		// rcvMsg = accept1,balNum,balId,val
+		// rcvMsg = accept1,balNum,balId,val,msg
 		else if(input.substring(0, 7).equals("accept1")){
+			System.out.println("HandlerThread received accept1");
 			int[] recvBallotNum = {0,0};
 			recvBallotNum[0] = Integer.parseInt(recvMsg[1]);
 			recvBallotNum[1] = Integer.parseInt(recvMsg[2]);
 			int recvVal = Integer.parseInt(recvMsg[3]);
+			String message = recvMsg[4];
 			
 			boolean send2 = false;
 			synchronized (parentThread.p) {
-				send2 = parentThread.p.handleAccept1(recvBallotNum, recvVal);
+				send2 = parentThread.p.handleAccept1(recvBallotNum, recvVal, message);
 			}
 			if(send2) {
 				String msg = null;
@@ -114,6 +131,7 @@ public class HandlerThread extends Thread {
 		
 		// rcvMsg = accept2,balNum,balId,val,msg
 		else if(input.substring(0, 7).equals("accept2")){
+			System.out.println("HandlerThread received accept2");
 			int[] recvBallotNum = {0,0};
 			recvBallotNum[0] = Integer.parseInt(recvMsg[1]);
 			recvBallotNum[1] = Integer.parseInt(recvMsg[2]);
@@ -122,9 +140,20 @@ public class HandlerThread extends Thread {
 			
 			boolean decide = false;
 			synchronized (parentThread) {
-				decide = parentThread.p.handleAccept2(recvBallotNum, recvVal); 
+				decide = parentThread.p.handleAccept2(recvBallotNum, recvVal, msg); 
 				if(decide) {
+					if(parentThread.p.amLeader()){
+						Socket s = new Socket(parentThread.p.currentIp, parentThread.p.currentPort);
+						PrintWriter socketOut = new PrintWriter(s.getOutputStream());
+						
+						socketOut.println("Post Successful!");
+						
+						socketOut.close();
+						s.close();
+					}
+					System.out.println("Adding: " + msg + " " + recvVal);
 					parentThread.log.add(recvVal, msg);
+					parentThread.p.doneDeciding();
 				}
 			}
 		}
@@ -137,19 +166,27 @@ public class HandlerThread extends Thread {
 	}
 	
 	private synchronized void read(String ip, Integer port) throws IOException{
+		System.out.println("HandlerThread read");
 		Socket s = new Socket(ip, port);
-		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
+		PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
 		
-		for(int i = 0; i < parentThread.log.size(); i++){
-			socketOut.println(parentThread.log.get(i));
+		String readMsg = "";
+		
+		synchronized(parentThread){
+			for(int i = 0; i < parentThread.log.size(); i++){
+				System.out.println(parentThread.log.get(i));
+				//socketOut.println(parentThread.log.get(i));
+				readMsg += i + " " + parentThread.log.get(i) + ",";
+			}
 		}
-		
+		System.out.println("Sending Read msg as: " + readMsg);
+		socketOut.println(readMsg);
 		socketOut.close();
 		s.close();
 	}
 	
 	private synchronized void post(String ipAddress, Integer port, String message) throws IOException{
-
+		System.out.println("HandlerThread post");
 		boolean amLeader = false;
 		boolean isDeciding = true;
 		synchronized(parentThread.p){
@@ -181,27 +218,33 @@ public class HandlerThread extends Thread {
 				leader = parentThread.p.getLeader();
 			}
 			if(leader != -1) {
-				Socket s = new Socket(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader));
+				Socket s = new Socket();
+				try {
+					s.connect(new InetSocketAddress(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader)), 5000);
+				} catch (SocketTimeoutException e){
+			        System.out.println("Socket Timeout. Starting Election");
+			        String prepareMsg = null;
+					synchronized(parentThread.p) {
+						parentThread.p.startPrepare();
+						prepareMsg = parentThread.p.getPrepareMsg();
+					}
+					broadcast(prepareMsg);
+					s.close();
+					return;
+			    }
+				
+				// If no timeout...
 				PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
-	
 				socketOut.println("Post," + ipAddress + "," + port.toString() + "," + message);
 				socketOut.close();
 				s.close();
 			}
 
-			// TODO: If timeout then start election.
-			// prepare siteNum balNum balId
-			// TODO: Add the timeout stuff...
-			String prepareMsg = null;
-			synchronized(parentThread.p) {
-				parentThread.p.startPrepare();
-				prepareMsg = parentThread.p.getPrepareMsg();
-			}
-			broadcast(prepareMsg);
 		}
 	}
 	
 	private void sendTo(String msg, String ip, int port) throws UnknownHostException, IOException {
+		System.out.println("HandlerThread sendTo " + msg);
 		Socket s = new Socket(ip, port);
 		PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
 		
@@ -211,11 +254,15 @@ public class HandlerThread extends Thread {
 	}
 	
 	private void broadcast(String msg) throws UnknownHostException, IOException {
+		System.out.println("HandlerThread broadcast " + msg);
 		for(int i = 0; i < 5; i++){
 			Socket s = new Socket(Globals.siteIpAddresses.get(i), Globals.sitePorts.get(i));
 			PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
 
 			socketOut.println(msg);
+			
+			socketOut.close();
+			s.close();
 		}
 	}
 }
