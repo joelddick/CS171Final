@@ -37,7 +37,7 @@ public class SiteProcess{
 		}
 	}
 	
-	private void processInput(String input) throws InterruptedException, IOException {
+	private void processInput(String input) throws InterruptedException {
 		if (input.length() < 4) {
 			return;
 		}
@@ -54,7 +54,6 @@ public class SiteProcess{
 			if(failed) {
 				System.out.println("Restoring...");
 				failed = false;
-				requestLog();
 				synchronized(myComm) {
 					myComm.notify();
 				}
