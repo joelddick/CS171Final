@@ -1,10 +1,18 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 
 public class SiteProcess{
 	private CommThread myComm;
+	private ServerSocket serverSocket;
 	public static boolean failed = false;
 	
 	public SiteProcess(){
@@ -48,4 +56,36 @@ public class SiteProcess{
 			}
 		}
 	}
+	
+	private void requestLog() throws IOException {
+		askLeaderForLog(0);
+	}
+	
+	private boolean askLeaderForLog(int leader) throws IOException {
+		Socket socket = new Socket();
+		String leaderIp = Globals.siteIpAddresses.get(leader);
+		int leaderPort = Globals.sitePorts.get(leader);
+		
+		try {
+			socket.connect(new InetSocketAddress(leaderIp, leaderPort), 7000);
+		} catch (IOException e){
+			System.out.println("Client socket timeout. Trying new leader.");
+			socket.close();
+			return false;
+		}
+		
+		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
+
+		// RequestLog,sourceID
+		socketOut.println("RequestLog," + Globals.mySiteId);
+
+		socketOut.close();
+		socket.close();
+		
+		return true;
+	}
 }
+
+
+
+

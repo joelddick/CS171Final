@@ -173,6 +173,7 @@ public class Paxos {
 	}
 	
 	
+	
 	// Compares two ballot numbers in the form of int arrays
 	// Returns true if left > right.
 	public boolean isGreater(int b1[], int b2[]) {
