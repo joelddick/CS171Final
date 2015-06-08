@@ -56,7 +56,6 @@ public class ClientProcess {
 				System.out.println(response.get(0));
 			}
 		} else if (command.equals("Read")) {
-			read();
 			System.out.println("Waiting for Read");
 			
 			while(!read()){
