@@ -15,12 +15,14 @@ public class SiteProcess{
 		try{
 			BufferedReader cin = new BufferedReader(new InputStreamReader(System.in));
 			while (true) {
-				String input = cin.readLine();
-				try {
-					processInput(input);
-				}
-				catch (InterruptedException e) {
-					System.out.println(e.toString());
+				if(cin.ready()){
+					String input = cin.readLine();
+					try {
+						processInput(input);
+					}
+					catch (InterruptedException e) {
+						System.out.println(e.toString());
+					}
 				}
 			}
 		}
@@ -37,18 +39,12 @@ public class SiteProcess{
 			if(!failed){
 				System.out.println("Failing...");
 				failed = true;
-				synchronized(myComm) {
-					myComm.wait();
-				}
 			}
 		}
 		else if (input.substring(0, 7).equals("Restore")) {
 			if(failed) {
 				System.out.println("Restoring...");
 				failed = false;
-				synchronized(myComm) {
-					myComm.notify();
-				}
 			}
 		}
 	}

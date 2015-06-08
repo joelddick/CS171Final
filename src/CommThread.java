@@ -50,6 +50,7 @@ public class CommThread extends Thread{
 						try{
 							s.close();
 							serverSocket.close();
+							System.out.println("ServerSocket Closed");
 						}
 						catch(IOException e){
 							System.out.println(e.toString());
