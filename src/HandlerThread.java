@@ -220,7 +220,7 @@ public class HandlerThread extends Thread {
 			if(leader != -1) {
 				Socket s = new Socket();
 				try {
-					s.connect(new InetSocketAddress(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader)), 1000);
+					s.connect(new InetSocketAddress(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader)), 5000);
 				} catch (SocketTimeoutException e){
 			        System.out.println("Socket Timeout. Starting Election");
 			        String prepareMsg = null;
