@@ -96,8 +96,7 @@ public class ClientProcess {
 
 	private boolean read() throws IOException {
 		
-		Socket socket = new Socket(Globals.siteIpAddresses.get(leader),
-				Globals.sitePorts.get(leader));
+		Socket socket = new Socket(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader));
 		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
 
 		socketOut.println("Read," + ipAddress + "," + port.toString());
