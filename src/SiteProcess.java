@@ -8,6 +8,7 @@ public class SiteProcess{
 	public static boolean failed = false;
 	
 	public SiteProcess(){
+		System.out.println("New SiteProcess");
 		myComm = new CommThread();
 		synchronized(myComm) {
 			myComm.start();

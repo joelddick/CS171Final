@@ -43,6 +43,9 @@ public class Deploy {
 		Integer port4 = Integer.valueOf(site4.substring(site4.indexOf(' ')+1));
 		Integer port5 = Integer.valueOf(site5.substring(site5.indexOf(' ')+1));
 		
+		System.out.println("site1s: " + site1s);
+		System.out.println("port1: " + port1);
+		
 		br.close();
 		fr.close();
 		

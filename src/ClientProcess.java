@@ -21,8 +21,10 @@ public class ClientProcess {
 	private ServerSocket serverSocket;
 
 	public ClientProcess() {
+		System.out.print("New ClientProcess");
 		ipAddress = Globals.siteIpAddresses.get(Globals.mySiteId);
 		this.port += Globals.mySiteId;
+		System.out.println(" with port " + this.port);
 		try {
 			BufferedReader cin = new BufferedReader(new InputStreamReader(
 					System.in));
@@ -47,9 +49,11 @@ public class ClientProcess {
 			}
 			while(!post(message)){
 				leader = (leader+1)%5;
+				System.out.println("1 Leader is: " + leader);
 			}
 			while(!myWait()){
 				leader = (leader+1)%5;
+				System.out.println("2 Leader is: " + leader);
 				post(message);
 			}
 			if(response != null) {
@@ -125,27 +129,39 @@ public class ClientProcess {
 	
 			
 			String blog = socketIn.nextLine();
-			System.out.println("blog is: " + blog);
-			if(blog != null) {
-				String[] posts = blog.split(",");
-				for(String post : posts) {
-					response.add(post);
-				}
+			String[] maybeFailed = blog.split(",");
+			if(maybeFailed[0].equals("DEAD")) {
+				System.out.println("Client heard old leader is dead.");
+				socketIn.close();
+				serverSocket.close();
+				return false;
 			}
+			
 			else {
-				System.out.println("Blog empty!");
+				System.out.println("blog is: " + blog);
+			
+				if(blog != null) {
+					String[] posts = blog.split(",");
+					for(String post : posts) {
+						response.add(post);
+					}
+				}
+				else if (blog == null) {
+					System.out.println("Blog empty!");
+				}
+		
+				socketIn.close();
+				socket.close();
+				serverSocket.close();
+				return true;
 			}
-	
-			socketIn.close();
-			socket.close();
-			serverSocket.close();
-			return true;
 			
 		} catch (SocketTimeoutException e){
 			System.out.println("Something went wrong, please try again.");
 			// Select new leader.
 			
 		}
+		
 		serverSocket.close();
 		return false;
 	}

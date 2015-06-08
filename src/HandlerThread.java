@@ -43,29 +43,50 @@ public class HandlerThread extends Thread {
 		String[] recvMsg = input.split(",");
 		String cmd = recvMsg[0];
 		
-		if(input.substring(0, 4).equals("Read")) {
+		if(SiteProcess.failed && (recvMsg[0].equals("Post") || recvMsg[0].equals("Read"))) {
+			String ip = recvMsg[1];
+			Integer port = Integer.valueOf(recvMsg[2]);
+			System.out.println("Calling sendImDead 1");
+			sendImDead(ip, port);
+		}
+		
+		else if(input.substring(0, 4).equals("Read")) {
 			System.out.println("HandlerThread received Read");
-//			String leftover = input.substring(input.indexOf(",") + 1);
-//			String ip = input.substring(0, leftover.indexOf(","));
-//			leftover = leftover.substring(input.indexOf(",") + 1);
-//			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
 			String ip = recvMsg[1];
 			Integer port = Integer.valueOf(recvMsg[2]);
 			read(ip, port);
 		}
+		
 		else if(input.substring(0, 4).equals("Post")) {
 			System.out.println("HandlerThread received Post");
-//			String leftover = input.substring(input.indexOf(",") + 1);
-//			String ip = input.substring(0, leftover.indexOf(","));
-//			leftover = leftover.substring(input.indexOf(",") + 1);
-//			Integer port = Integer.valueOf(leftover.substring(0, leftover.indexOf(",")));
-//			String msg = leftover.substring(input.indexOf(",") + 1);
-			
 			String ip = recvMsg[1];
 			Integer port = Integer.valueOf(recvMsg[2]);
 			String msg = recvMsg[3];
 			
-			post(ip, port, msg);
+			if(!SiteProcess.failed) {
+				System.out.println("Post: " + " " + ip + " " + port + " " + msg);
+				post(ip, port, msg);
+			} else {
+				System.out.println("Calling sendImDead 2");
+				sendImDead(ip, port);
+			}
+		}
+		
+		else if(recvMsg[0].equals("PostForward")) {
+			//"PostForward, mySiteId, ipAddress, port, message
+			System.out.println("HandlerThread received PostForward");
+			int forwardingSite = Integer.parseInt(recvMsg[1]);
+			String originIp = recvMsg[2];
+			int originPort = Integer.parseInt(recvMsg[3]);
+			String msg = recvMsg[4];
+			
+			if(!SiteProcess.failed) {
+				System.out.println("PostForward: " + " " + originIp + " " + originPort + " " + msg);
+				post(originIp, originPort, msg);
+			} else {
+				System.out.println("Calling sendImDead 3");
+				sendImDead(Globals.siteIpAddresses.get(forwardingSite), Globals.sitePorts.get(forwardingSite));	
+			}
 		}
 		
 		// prepare siteNum balNum balId
@@ -163,6 +184,18 @@ public class HandlerThread extends Thread {
 			// TODO: Do we want to check for majority of decides? or as soon
 			// as we get one decide message.
 		}
+		
+		else if(recvMsg[0].equals("DEAD")) {
+			// Start election.
+		    System.out.println("Site " + recvMsg[1] + " is dead. Starting Election");
+		    String prepareMsg = null;
+			synchronized(parentThread.p) {
+				parentThread.p.startPrepare();
+				prepareMsg = parentThread.p.getPrepareMsg();
+			}
+			broadcast(prepareMsg);
+		}
+		
 	}
 	
 	private synchronized void read(String ip, Integer port) throws IOException{
@@ -195,7 +228,9 @@ public class HandlerThread extends Thread {
 		}
 
 		if(amLeader){
+			
 			if(!isDeciding){
+				System.out.println("I'm leader! Sending accept");
 				String msg = null;
 				synchronized(parentThread.p) {
 					parentThread.p.prepPost(ipAddress, port, message);
@@ -204,6 +239,7 @@ public class HandlerThread extends Thread {
 				broadcast(msg);
 			}
 			else{
+				System.out.println("I'm leader! But am already deciding. Reject.");
 				Socket s = new Socket(ipAddress, port);
 				PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
 				
@@ -213,10 +249,12 @@ public class HandlerThread extends Thread {
 			}
 		}
 		else{
+			// Am not leader, need to forward Post 
 			int leader = -1;
 			synchronized(parentThread.p) {
 				leader = parentThread.p.getLeader();
 			}
+			System.out.println("I'm NOT leader. Trying to forward to " + leader);
 			if(leader != -1) {
 				Socket s = new Socket();
 				try {
@@ -234,17 +272,25 @@ public class HandlerThread extends Thread {
 			    }
 				
 				// If no timeout...
+				System.out.println("I'm NOT leader. Forwarding to " + leader);
 				PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
-				socketOut.println("Post," + ipAddress + "," + port.toString() + "," + message);
+				socketOut.println("PostForward," + "," + Globals.mySiteId + "," + ipAddress + "," + port.toString() + "," + message);
 				socketOut.close();
 				s.close();
+				System.out.println("Forwarded " + "PostForward," + "," + Globals.mySiteId + "," + ipAddress + "," + port.toString() + "," + message);
 			}
 
 		}
 	}
 	
+	private void sendImDead(String ip, Integer port) throws UnknownHostException, IOException {
+		System.out.println("Sending DEAD");
+		String deadMsg = "DEAD," + Globals.mySiteId;
+		sendTo(deadMsg, ip, port);
+	}
+	
 	private void sendTo(String msg, String ip, int port) throws UnknownHostException, IOException {
-		System.out.println("HandlerThread sendTo " + msg);
+		System.out.println("HandlerThread sendTo " + msg + " " + ip);
 		Socket s = new Socket(ip, port);
 		PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
 		
