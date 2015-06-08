@@ -66,7 +66,7 @@ public class ClientProcess {
 		try {
 			socket.connect(new InetSocketAddress(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader)), 5000);
 		} catch (SocketTimeoutException e){
-			System.out.println("Client socket timeout. Choosing new random leader.");
+			System.out.println("Client socket timeout. Trying new leader.");
 			socket.close();
 			return false;
 		}
