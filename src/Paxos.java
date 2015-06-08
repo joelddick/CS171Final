@@ -125,6 +125,7 @@ public class Paxos {
 			this.acceptNum[1] = recvBallotNum[1];
 			this.acceptVal = recvVal;
 			this.msg = message;
+			this.leader = recvBallotNum[1];
 			return true;
 		}
 		return false;
