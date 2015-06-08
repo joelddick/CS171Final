@@ -35,6 +35,7 @@ public class CommThread extends Thread{
 				try{
 					if(serverSocket.isClosed()){
 						serverSocket = new ServerSocket(port);
+						System.out.println("Created new serverSocket");
 					}
 					s = serverSocket.accept();
 				}
