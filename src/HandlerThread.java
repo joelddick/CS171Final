@@ -183,7 +183,7 @@ public class HandlerThread extends Thread {
 		
 		else if(recvMsg[0].equals("LogIs")) {
 			System.out.println("Updating my log");
-			synchronized(parentThread.log) {
+			synchronized(parentThread) {
 				for(int i = 1; i < recvMsg.length; i++) {
 					while(parentThread.log.size() < recvMsg.length-1) {
 						parentThread.log.add("");
@@ -191,6 +191,7 @@ public class HandlerThread extends Thread {
 					}
 					parentThread.log.set(i-1, recvMsg[i]);
 				}
+				parentThread.p.myVal = recvMsg.length;
 			}
 		}
 		
