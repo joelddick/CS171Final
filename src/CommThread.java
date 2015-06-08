@@ -38,7 +38,7 @@ public class CommThread extends Thread{
 				catch(IOException e){
 					System.out.println(e.toString());
 				}
-				if(s != null){
+				if(s != null && !SiteProcess.failed){
 					new Thread(new HandlerThread(this, s)).start();
 				}
 				s = null;
