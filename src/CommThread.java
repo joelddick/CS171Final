@@ -18,9 +18,10 @@ public class CommThread extends Thread{
 	public CommThread(){
 		try{
 			serverSocket = new ServerSocket(port);
+			serverSocket.setSoTimeout(2000);
 		}
 		catch (IOException e){
-			System.out.println(e.toString());
+			//System.out.println(e.toString());
 		}
 		
 		p = new Paxos(); // populate in handler thread after receiving "post" if leader
@@ -35,12 +36,23 @@ public class CommThread extends Thread{
 				try{
 					if(serverSocket.isClosed()){
 						serverSocket = new ServerSocket(port);
-						System.out.println("Created new serverSocket");
+						serverSocket.setSoTimeout(2000);
+						//System.out.println("Created new serverSocket");
 					}
+					//System.out.println("Accepting Connection");
 					s = serverSocket.accept();
 				}
 				catch(IOException e){
-					System.out.println(e.toString());
+					//System.out.println(e.to
+					if(SiteProcess.failed){
+						try{
+							serverSocket.close();
+						}
+						catch(IOException e2){
+							//
+						}
+						break;
+					}
 				}
 				if(s != null){
 					if(!SiteProcess.failed){
@@ -53,7 +65,7 @@ public class CommThread extends Thread{
 							System.out.println("ServerSocket Closed");
 						}
 						catch(IOException e){
-							System.out.println(e.toString());
+							//System.out.println(e.toString());
 						}
 					}
 				}
