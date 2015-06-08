@@ -172,7 +172,7 @@ public class HandlerThread extends Thread {
 				sendLog(id);
 //			}
 //			else {
-				sendLeaderIsTo(leader, id);
+//				sendLeaderIsTo(leader, id);
 //			}
 		}
 		
