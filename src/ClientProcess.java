@@ -58,7 +58,15 @@ public class ClientProcess {
 		} else if (command.equals("Read")) {
 			read();
 			System.out.println("Waiting for Read");
-			List<String> response = myWait();
+			
+			while(!read()){
+				leader = (leader+1)%5;
+			}
+			while(!myWait()){
+				leader = (leader+1)%5;
+				read();
+			}
+			
 			if(response != null) {
 				for (int i = 0; i < response.size(); i++) {
 					System.out.println(response.get(i));
@@ -86,7 +94,7 @@ public class ClientProcess {
 		return true;
 	}
 
-	private void read() throws IOException {
+	private boolean read() throws IOException {
 		
 		Socket socket = new Socket(Globals.siteIpAddresses.get(leader),
 				Globals.sitePorts.get(leader));
@@ -96,6 +104,8 @@ public class ClientProcess {
 
 		socketOut.close();
 		socket.close();
+		
+		return true;
 	}
 
 	private boolean myWait() throws IOException {
