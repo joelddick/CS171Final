@@ -34,6 +34,17 @@ public class Paxos {
 		isDeciding = false;
 	}
 	
+	public synchronized void resetStillDeciding() {
+		msg = null;
+		numAcks = 0;
+		ackedAcceptBal[0] = -1;
+		ackedAcceptBal[1] = -1;
+		acceptNum[0] = 0;
+		acceptNum[1] = 0;
+		acceptVal = -1;
+		numAccept2s = 0;
+	}
+	
 	public synchronized boolean beginPhaseOne() {
 		ballotNum[0]++;
 		sendPrepare();
@@ -80,7 +91,7 @@ public class Paxos {
 			// This is a higher ballot than my current, join it.
 			this.ballotNum[0] = recvBallotNum[0];
 			this.ballotNum[1] = recvBallotNum[1];
-			
+			resetStillDeciding(); 
 			return true;
 		}
 		return false;
