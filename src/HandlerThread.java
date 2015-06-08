@@ -196,6 +196,7 @@ public class HandlerThread extends Thread {
 		}
 
 		if(amLeader){
+			System.out.println("I am the Leader!");
 			if(!isDeciding){
 				String msg = null;
 				synchronized(parentThread.p) {
@@ -214,13 +215,13 @@ public class HandlerThread extends Thread {
 			}
 		}
 		else{
+			System.out.println("Not the Leader!");
 			int leader = -1;
 			synchronized(parentThread.p) {
 				leader = parentThread.p.getLeader();
 				System.out.println("Leader is " + leader);
 			}
 			if(leader != -1) {
-				System.out.println("Not the Leader!");
 				Socket s = new Socket();
 				try {
 					System.out.println("Trying to connect to " + leader);
