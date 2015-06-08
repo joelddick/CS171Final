@@ -9,7 +9,9 @@ public class SiteProcess{
 	
 	public SiteProcess(){
 		myComm = new CommThread();
-		myComm.start();
+		synchronized(myComm) {
+			myComm.start();
+		}
 		try{
 			BufferedReader cin = new BufferedReader(new InputStreamReader(System.in));
 			while (true){
@@ -35,14 +37,18 @@ public class SiteProcess{
 			if(!failing){
 				System.out.println("Failing...");
 				failing = true;
-				myComm.wait();
+				synchronized(myComm) {
+					myComm.wait();
+				}
 			}
 		}
 		else if (input.substring(0, 7).equals("Restore")){
 			if(failing){
 				System.out.println("Restoring...");
 				failing = false;
-				myComm.notify();
+				synchronized(myComm) {
+					myComm.notify();
+				}
 			}
 		}
 	}
