@@ -48,14 +48,17 @@ public class ClientProcess {
 				leader = (leader+1)%5;
 			}
 			List<String> response = myWait();
-			System.out.println(response.get(0));
+			if(response != null) {
+				System.out.println(response.get(0));
+			}
 		} else if (command.equals("Read")) {
 			read();
 			System.out.println("Waiting for Read");
 			List<String> response = myWait();
-//			System.out.println(response.get(0));
-			for (int i = 0; i < response.size(); i++) {
-				System.out.println(response.get(i));
+			if(response != null) {
+				for (int i = 0; i < response.size(); i++) {
+					System.out.println(response.get(i));
+				}
 			}
 		}
 	}
@@ -80,6 +83,7 @@ public class ClientProcess {
 	}
 
 	private void read() throws IOException {
+		
 		Socket socket = new Socket(Globals.siteIpAddresses.get(leader),
 				Globals.sitePorts.get(leader));
 		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
@@ -92,36 +96,43 @@ public class ClientProcess {
 
 	private ArrayList<String> myWait() throws IOException {
 		serverSocket = new ServerSocket(port);
+		serverSocket.setSoTimeout(5000);
 		System.out.println("Waiting for accept.");
-		Socket socket = serverSocket.accept();
-		Scanner socketIn = new Scanner(socket.getInputStream());
-
-		ArrayList<String> response = new ArrayList<String>();
-		
-		System.out.println("Accepted but waiting for something");
-		
-		while (!socketIn.hasNext()) {
-			// Wait
-		}
-
-		
-		String blog = socketIn.nextLine();
-		System.out.println("blog is: " + blog);
-		if(blog != null) {
-			String[] posts = blog.split(",");
-			for(String post : posts) {
-				response.add(post);
+		try {
+			Socket socket = serverSocket.accept();
+			Scanner socketIn = new Scanner(socket.getInputStream());
+	
+			ArrayList<String> response = new ArrayList<String>();
+			
+			System.out.println("Accepted but waiting for something");
+			
+			while (!socketIn.hasNext()) {
+				// Wait
 			}
+	
+			
+			String blog = socketIn.nextLine();
+			System.out.println("blog is: " + blog);
+			if(blog != null) {
+				String[] posts = blog.split(",");
+				for(String post : posts) {
+					response.add(post);
+				}
+			}
+			else {
+				System.out.println("Blog empty!");
+			}
+	
+			socketIn.close();
+			socket.close();
+			
+			return response;
+			
+		} catch (SocketTimeoutException e){
+			System.out.println("Something went wrong, please try again.");
+			
 		}
-		else {
-			System.out.println("Blog empty!");
-		}
-		
-
-		socketIn.close();
-		socket.close();
 		serverSocket.close();
-
-		return response;
+		return null;
 	}
 }
