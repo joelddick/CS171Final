@@ -62,7 +62,8 @@ public class Paxos {
 		 return msg;
 	}
 	
-	public synchronized void startPrepare(){
+	public synchronized void startPrepare(String message){
+		this.msg = message;
 		this.ballotNum[0]++;
 		this.ballotNum[1] = Globals.mySiteId;
 	}
