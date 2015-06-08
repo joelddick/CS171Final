@@ -13,7 +13,7 @@ public class Paxos {
 	private int 	acceptVal = -1; // Initialize to -1 because 0 is location in log
 	private int 	numAccept2s = 0;
 	private int		siteId;
-	private int 	leader;
+	public int 	leader;
 	private boolean isDeciding = false;
 	public String currentIp;
 	public Integer currentPort;
@@ -145,7 +145,7 @@ public class Paxos {
 	
 	public synchronized boolean handleAccept2(int[] recvBallotNum, int recvVal, String message) {
 		System.out.println("handleAccept2 	" + recvBallotNum[0] + " " + recvBallotNum[1] + " " + recvVal + " " + myVal);
-		if(recvVal == myVal) {
+		if(recvVal >= myVal) {
 			acceptNum[0] = recvBallotNum[0];
 			acceptNum[1] = recvBallotNum[1];
 			acceptVal = recvVal;
