@@ -4,8 +4,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -42,7 +44,9 @@ public class ClientProcess {
 			if (message.length() > 140) {
 				message = message.substring(0, 140);
 			}
-			post(message);
+			while(!post(message)){
+				leader = (leader+1)%5;
+			}
 			List<String> response = myWait();
 			System.out.println(response.get(0));
 		} else if (command.equals("Read")) {
@@ -56,16 +60,23 @@ public class ClientProcess {
 		}
 	}
 
-	private void post(String message) throws IOException {
-		Socket socket = new Socket(Globals.siteIpAddresses.get(leader),
-				Globals.sitePorts.get(leader));
+	private boolean post(String message) throws IOException {
+		
+		Socket socket = new Socket();
+		try {
+			socket.connect(new InetSocketAddress(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader)), 5000);
+		} catch (SocketTimeoutException e){
+			System.out.println("Client socket timeout. Choosing new random leader.");
+			socket.close();
+			return false;
+		}
+		
 		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
-
-		socketOut.println("Post," + ipAddress + "," + port.toString() + ","
-				+ message);
+		socketOut.println("Post," + ipAddress + "," + port.toString() + "," + message);
 
 		socketOut.close();
 		socket.close();
+		return true;
 	}
 
 	private void read() throws IOException {
