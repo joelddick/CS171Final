@@ -190,7 +190,7 @@ public class HandlerThread extends Thread {
 					}
 					parentThread.log.set(i-1, recvMsg[i]);
 				}
-				parentThread.p.myVal = recvMsg.length-1;
+				parentThread.p.myVal = recvMsg.length - 1;
 			}
 		}
 		
