@@ -35,7 +35,6 @@ public class Paxos {
 	}
 	
 	public synchronized void resetStillDeciding() {
-		msg = null;
 		numAcks = 0;
 		ackedAcceptBal[0] = -1;
 		ackedAcceptBal[1] = -1;
