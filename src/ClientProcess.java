@@ -125,7 +125,7 @@ public class ClientProcess {
 	
 			socketIn.close();
 			socket.close();
-			
+			serverSocket.close();
 			return response;
 			
 		} catch (SocketTimeoutException e){
