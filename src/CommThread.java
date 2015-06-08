@@ -71,6 +71,11 @@ public class CommThread extends Thread{
 				}
 				s = null;
 			}
+			if(SiteProcess.failed){
+				synchronized(p){
+					p.leader = -1;
+				}
+			}
 		}
 	}
 }
