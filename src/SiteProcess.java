@@ -3,16 +3,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.Scanner;
 
 
 public class SiteProcess{
 	private CommThread myComm;
-	private ServerSocket serverSocket;
 	public static boolean failed = false;
 	
 	public SiteProcess(){
@@ -39,7 +34,7 @@ public class SiteProcess{
 		}
 	}
 	
-	private void processInput(String input) throws InterruptedException {
+	private void processInput(String input) throws InterruptedException, IOException {
 		if (input.length() < 4) {
 			return;
 		}
@@ -53,6 +48,7 @@ public class SiteProcess{
 			if(failed) {
 				System.out.println("Restoring...");
 				failed = false;
+				requestLog();
 			}
 		}
 	}
