@@ -159,11 +159,102 @@ public class HandlerThread extends Thread {
 			}
 		}
 		
+		// recvMsg = RequestLog,sourceID
+		else if(recvMsg[0].equals("RequestLog")) {
+			boolean amLeader = false;
+			int id = Integer.parseInt(recvMsg[1]);
+			int leader = -1;
+			synchronized(parentThread.p){
+				amLeader = parentThread.p.amLeader();
+				leader = parentThread.p.getLeader();
+			}
+			if(amLeader) {
+				sendLog(id);
+			}
+			else {
+				sendLeaderIsTo(leader, id);
+			}
+		}
+		
+		else if(recvMsg[0].equals("LeaderIs")) {
+			System.out.println("Asking new leader for log");
+			askLeaderForLog(Integer.parseInt(recvMsg[1]));
+		}
+		
+		else if(recvMsg[0].equals("LogIs")) {
+			System.out.println("Updating my log");
+			synchronized(parentThread.log) {
+				for(int i = 1; i < recvMsg.length; i++) {
+					parentThread.log.clear();
+					parentThread.log.add(recvMsg[i]);
+				}
+			}
+		}
+		
 		else if(recvMsg[0].equals("decide")) {
 			// TODO: decide on this value, add to log, reset Paxos variables.
 			// TODO: Do we want to check for majority of decides? or as soon
 			// as we get one decide message.
 		}
+	}
+	
+	private boolean askLeaderForLog(int leader) throws IOException {
+		Socket socket = new Socket();
+		String leaderIp = Globals.siteIpAddresses.get(leader);
+		int leaderPort = Globals.sitePorts.get(leader);
+		
+		try {
+			socket.connect(new InetSocketAddress(leaderIp, leaderPort), 7000);
+		} catch (IOException e){
+			System.out.println("Client socket timeout. Trying new leader.");
+			socket.close();
+			return false;
+		}
+		
+		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
+
+		// RequestLog,sourceID
+		socketOut.println("RequestLog," + Globals.mySiteId);
+
+		socketOut.close();
+		socket.close();
+		
+		return true;
+	}
+	
+	private synchronized void sendLeaderIsTo(int leader, int originId) throws UnknownHostException, IOException {
+		System.out.println("HandlerThread sendLeaderIsTo to: " + originId);
+		String ip = Globals.siteIpAddresses.get(originId);
+		int port = Globals.sitePorts.get(originId);
+		
+		Socket s = new Socket(ip, port);
+		PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
+		
+		String leaderMsg = "LeaderIs,"+leader;
+		socketOut.println(leaderMsg);
+		socketOut.close();
+		s.close();
+	}
+	
+	private synchronized void sendLog(int id) throws UnknownHostException, IOException {
+		System.out.println("HandlerThread sendLog to: " + id);
+		String ip = Globals.siteIpAddresses.get(id);
+		int port = Globals.sitePorts.get(id);
+		
+		Socket s = new Socket(ip, port);
+		PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
+		
+		String logCopy = "LogIs,";
+		
+		synchronized(parentThread){
+			for(int i = 0; i < parentThread.log.size(); i++){
+				System.out.println(parentThread.log.get(i));
+				logCopy += parentThread.log.get(i) + ",";
+			}
+		}
+		socketOut.println(logCopy);
+		socketOut.close();
+		s.close();
 	}
 	
 	private synchronized void read(String ip, Integer port) throws IOException{
