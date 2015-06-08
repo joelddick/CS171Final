@@ -187,7 +187,6 @@ public class HandlerThread extends Thread {
 				for(int i = 1; i < recvMsg.length; i++) {
 					while(parentThread.log.size() < recvMsg.length-1) {
 						parentThread.log.add("");
-						parentThread.log.add("");
 					}
 					parentThread.log.set(i-1, recvMsg[i]);
 				}
