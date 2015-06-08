@@ -297,7 +297,7 @@ public class HandlerThread extends Thread {
 				broadcast(msg);
 			}
 			else{
-				// I am deciding and incomingPort == currentPort, then reset
+				// I am deciding and incomingPort == currentPort, then reset, don't reject
 				boolean reject = true;
 				synchronized(parentThread.p) {
 					if(port == parentThread.p.currentPort) {
