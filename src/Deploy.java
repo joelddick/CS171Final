@@ -7,7 +7,7 @@ public class Deploy {
 	public static void main(String [] args) throws NumberFormatException, IOException {
 		configureGlobals();
 		if (args[0].equals("-c")){
-			ClientProcess c = new ClientProcess();
+			ClientProcess c = new ClientProcess(Integer.valueOf(args[1]));
 		}
 		else if(args[0].equals("-s")){
 			SiteProcess s = new SiteProcess();

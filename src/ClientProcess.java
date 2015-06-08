@@ -20,9 +20,9 @@ public class ClientProcess {
 
 	private ServerSocket serverSocket;
 
-	public ClientProcess() {
-		ipAddress = Globals.siteIpAddresses.get(Globals.mySiteId);
-		this.port += Globals.mySiteId;
+	public ClientProcess(Integer port) {
+		ipAddress = "52.24.121.39";
+		this.port = port;
 		try {
 			BufferedReader cin = new BufferedReader(new InputStreamReader(
 					System.in));
