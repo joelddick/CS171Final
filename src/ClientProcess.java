@@ -74,12 +74,12 @@ public class ClientProcess {
 		}
 	}
 
-	private boolean post(String message) throws IOException {
+	private boolean post(String message) throws IOException{
 		
 		Socket socket = new Socket();
 		try {
 			socket.connect(new InetSocketAddress(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader)), 7000);
-		} catch (SocketTimeoutException e){
+		} catch (IOException e){
 			System.out.println("Client socket timeout. Trying new leader.");
 			socket.close();
 			return false;
@@ -95,7 +95,16 @@ public class ClientProcess {
 
 	private boolean read() throws IOException {
 		
-		Socket socket = new Socket(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader));
+		Socket socket = new Socket();
+		
+		try {
+			socket.connect(new InetSocketAddress(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader)), 7000);
+		} catch (IOException e){
+			System.out.println("Client socket timeout. Trying new leader.");
+			socket.close();
+			return false;
+		}
+		
 		PrintWriter socketOut = new PrintWriter(socket.getOutputStream(), true);
 
 		socketOut.println("Read," + ipAddress + "," + port.toString());
