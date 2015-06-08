@@ -297,12 +297,23 @@ public class HandlerThread extends Thread {
 				broadcast(msg);
 			}
 			else{
-				Socket s = new Socket(ipAddress, port);
-				PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
-				
-				socketOut.println("Post Failed. Please try again.");
-				socketOut.close();
-				s.close();
+				// I am deciding and incomingPort == currentPort, then reset
+				boolean reject = true;
+				synchronized(parentThread.p) {
+					if(port == parentThread.p.currentPort) {
+						parentThread.p.reset();
+						reject = false;
+					}
+				}
+				if(reject) {
+					// Else, I am deciding and incomingPort != currentPort, then reject
+					Socket s = new Socket(ipAddress, port);
+					PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
+					
+					socketOut.println("Post Failed. Please try again.");
+					socketOut.close();
+					s.close();
+				}
 			}
 		}
 		else{
