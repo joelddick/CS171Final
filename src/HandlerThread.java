@@ -92,7 +92,7 @@ public class HandlerThread extends Thread {
 		// ackMsg = {ack balnum balnumid acceptBalNum acceptBalNumId}
 		else if(input.substring(0, 3).equals("ack")) {
 			System.out.println("HandlerThread received ack");
-			String[] ackMsg = input.split(" ");
+			String[] ackMsg = input.split(",");
 			int recvBallotNum[] = {Integer.parseInt(ackMsg[1]), Integer.parseInt(ackMsg[2])};
 			int recvAcceptBallot[] = {Integer.parseInt(ackMsg[3]), Integer.parseInt(ackMsg[4])};
 			int recvAcceptVal = Integer.parseInt(ackMsg[5]);
