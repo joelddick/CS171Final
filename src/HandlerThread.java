@@ -100,8 +100,9 @@ public class HandlerThread extends Thread {
 			synchronized (parentThread.p) {
 				boolean send = parentThread.p.handleAck(recvBallotNum, recvAcceptBallot, recvAcceptVal); 
 				if(send) {
-					// accept ballotNum ballotId myval
+					// accept1 ballotNum ballotId myval mag
 					String acceptMsg = parentThread.p.firstAcceptMessage();
+					System.out.println("sending " + acceptMsg);
 					broadcast(acceptMsg);
 				}
 			}

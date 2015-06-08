@@ -105,8 +105,8 @@ public class Paxos {
 						this.myVal = ackedAcceptVal;
 					}
 				}
-				this.numAcks++;
 			}
+			this.numAcks++;
 			if(this.numAcks == QUORUM) {
 				return true;
 			}
