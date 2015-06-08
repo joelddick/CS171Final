@@ -16,6 +16,7 @@ public class ClientProcess {
 	private int leader = 0;
 	private String ipAddress = "";
 	private Integer port = 5001;
+	private List<String> response;
 
 	private ServerSocket serverSocket;
 
@@ -47,7 +48,10 @@ public class ClientProcess {
 			while(!post(message)){
 				leader = (leader+1)%5;
 			}
-			List<String> response = myWait();
+			while(!myWait()){
+				leader = (leader+1)%5;
+				post(message);
+			}
 			if(response != null) {
 				System.out.println(response.get(0));
 			}
@@ -94,7 +98,7 @@ public class ClientProcess {
 		socket.close();
 	}
 
-	private ArrayList<String> myWait() throws IOException {
+	private boolean myWait() throws IOException {
 		serverSocket = new ServerSocket(port);
 		serverSocket.setSoTimeout(5000);
 		System.out.println("Waiting for accept.");
@@ -102,7 +106,7 @@ public class ClientProcess {
 			Socket socket = serverSocket.accept();
 			Scanner socketIn = new Scanner(socket.getInputStream());
 	
-			ArrayList<String> response = new ArrayList<String>();
+			response = new ArrayList<String>();
 			
 			System.out.println("Accepted but waiting for something");
 			
@@ -126,13 +130,14 @@ public class ClientProcess {
 			socketIn.close();
 			socket.close();
 			serverSocket.close();
-			return response;
+			return true;
 			
 		} catch (SocketTimeoutException e){
 			System.out.println("Something went wrong, please try again.");
+			// Select new leader.
 			
 		}
 		serverSocket.close();
-		return null;
+		return false;
 	}
 }
