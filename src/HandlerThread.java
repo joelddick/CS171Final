@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 
@@ -216,23 +218,28 @@ public class HandlerThread extends Thread {
 				leader = parentThread.p.getLeader();
 			}
 			if(leader != -1) {
-				Socket s = new Socket(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader));
+				Socket s = new Socket();
+				try {
+					s.connect(new InetSocketAddress(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader)), 1000);
+				} catch (SocketTimeoutException e){
+			        System.out.println("Socket Timeout. Starting Election");
+			        String prepareMsg = null;
+					synchronized(parentThread.p) {
+						parentThread.p.startPrepare();
+						prepareMsg = parentThread.p.getPrepareMsg();
+					}
+					broadcast(prepareMsg);
+					s.close();
+					return;
+			    }
+				
+				// If no timeout...
 				PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
-	
 				socketOut.println("Post," + ipAddress + "," + port.toString() + "," + message);
 				socketOut.close();
 				s.close();
 			}
 
-			// TODO: If timeout then start election.
-			// prepare siteNum balNum balId
-			// TODO: Add the timeout stuff...
-			String prepareMsg = null;
-			synchronized(parentThread.p) {
-				parentThread.p.startPrepare();
-				prepareMsg = parentThread.p.getPrepareMsg();
-			}
-			broadcast(prepareMsg);
 		}
 	}
 	
