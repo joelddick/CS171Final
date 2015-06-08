@@ -62,7 +62,9 @@ public class Paxos {
 		 return msg;
 	}
 	
-	public synchronized void startPrepare(String message){
+	public synchronized void startPrepare(String ipAddress, Integer port, String message){
+		this.currentIp = ipAddress;
+		this.currentPort = port;
 		this.msg = message;
 		this.ballotNum[0]++;
 		this.ballotNum[1] = Globals.mySiteId;

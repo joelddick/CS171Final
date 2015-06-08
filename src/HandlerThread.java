@@ -230,7 +230,7 @@ public class HandlerThread extends Thread {
 			        System.out.println("Socket Timeout. Starting Election");
 			        String prepareMsg = null;
 					synchronized(parentThread.p) {
-						parentThread.p.startPrepare(message);
+						parentThread.p.startPrepare(ipAddress, port, message);
 						prepareMsg = parentThread.p.getPrepareMsg();
 					}
 					broadcast(prepareMsg);
