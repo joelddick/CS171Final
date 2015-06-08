@@ -216,12 +216,15 @@ public class HandlerThread extends Thread {
 			int leader = -1;
 			synchronized(parentThread.p) {
 				leader = parentThread.p.getLeader();
+				System.out.println("Leader is " + leader);
 			}
 			if(leader != -1) {
+				System.out.println("Not the Leader!");
 				Socket s = new Socket();
 				try {
-					s.connect(new InetSocketAddress(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader)), 5000);
-				} catch (SocketTimeoutException e){
+					System.out.println("Trying to connect to " + leader);
+					s.connect(new InetSocketAddress(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader)), 1000);
+				} catch (IOException e){
 			        System.out.println("Socket Timeout. Starting Election");
 			        String prepareMsg = null;
 					synchronized(parentThread.p) {
@@ -232,6 +235,8 @@ public class HandlerThread extends Thread {
 					s.close();
 					return;
 			    }
+				
+				System.out.println("No Timeout");
 				
 				// If no timeout...
 				PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
@@ -253,9 +258,10 @@ public class HandlerThread extends Thread {
 		s.close();
 	}
 	
-	private void broadcast(String msg) throws UnknownHostException, IOException {
+	private void broadcast(String msg) throws UnknownHostException {
 		System.out.println("HandlerThread broadcast " + msg);
 		for(int i = 0; i < 5; i++){
+			try{
 			Socket s = new Socket(Globals.siteIpAddresses.get(i), Globals.sitePorts.get(i));
 			PrintWriter socketOut = new PrintWriter(s.getOutputStream(), true);
 
@@ -263,6 +269,10 @@ public class HandlerThread extends Thread {
 			
 			socketOut.close();
 			s.close();
+			}
+			catch (IOException e){
+				// Try the next one.
+			}
 		}
 	}
 }

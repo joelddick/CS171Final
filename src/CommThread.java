@@ -33,7 +33,11 @@ public class CommThread extends Thread{
 		while (true) {
 			while(!SiteProcess.failed) {
 				try{
-					 s = serverSocket.accept();
+					System.out.println("Trying to accept.");
+					if(serverSocket.isClosed()){
+						serverSocket = new ServerSocket(port);
+					}
+					s = serverSocket.accept();
 				}
 				catch(IOException e){
 					System.out.println(e.toString());
@@ -43,8 +47,11 @@ public class CommThread extends Thread{
 						new Thread(new HandlerThread(this, s)).start();
 					}
 					else{
+						System.out.println("We are closed!");
 						try{
-							 s.close();
+							s.close();
+							serverSocket.close();
+							System.out.println("We are actually closed!");
 						}
 						catch(IOException e){
 							System.out.println(e.toString());
