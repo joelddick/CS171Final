@@ -168,12 +168,12 @@ public class HandlerThread extends Thread {
 				amLeader = parentThread.p.amLeader();
 				leader = parentThread.p.getLeader();
 			}
-			if(amLeader) {
+//			if(amLeader) {
 				sendLog(id);
-			}
-			else {
+//			}
+//			else {
 				sendLeaderIsTo(leader, id);
-			}
+//			}
 		}
 		
 		else if(recvMsg[0].equals("LeaderIs")) {
@@ -185,8 +185,7 @@ public class HandlerThread extends Thread {
 			System.out.println("Updating my log");
 			synchronized(parentThread.log) {
 				for(int i = 1; i < recvMsg.length; i++) {
-					parentThread.log.clear();
-					parentThread.log.add(recvMsg[i]);
+					parentThread.log.set(i-1, recvMsg[i]);
 				}
 			}
 		}
