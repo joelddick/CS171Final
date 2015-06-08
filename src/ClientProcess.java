@@ -79,7 +79,7 @@ public class ClientProcess {
 		
 		Socket socket = new Socket();
 		try {
-			socket.connect(new InetSocketAddress(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader)), 5000);
+			socket.connect(new InetSocketAddress(Globals.siteIpAddresses.get(leader), Globals.sitePorts.get(leader)), 7000);
 		} catch (SocketTimeoutException e){
 			System.out.println("Client socket timeout. Trying new leader.");
 			socket.close();
@@ -109,7 +109,7 @@ public class ClientProcess {
 
 	private boolean myWait() throws IOException {
 		serverSocket = new ServerSocket(port);
-		serverSocket.setSoTimeout(5000);
+		serverSocket.setSoTimeout(7000);
 		System.out.println("Waiting for accept.");
 		try {
 			Socket socket = serverSocket.accept();
