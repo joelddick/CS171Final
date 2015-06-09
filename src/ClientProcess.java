@@ -37,10 +37,15 @@ public class ClientProcess {
 
 	private void processInput(String input) throws IOException {
 		if (input.length() < 4) {
+			System.out.println("Usage is 'Post <message>' or 'Read'.");
 			return;
 		}
 		String command = input.substring(0, 4);
 		if (command.equals("Post")) {
+			if (input.length() <= 5) {
+				System.out.println("Usage is 'Post <message>' or 'Read'.");
+				return;
+			}
 			String message = input.substring(5);
 			if (message.length() > 140) {
 				message = message.substring(0, 140);
