@@ -268,10 +268,15 @@ public class HandlerThread extends Thread {
 		String readMsg = "";
 		
 		synchronized(parentThread){
-			for(int i = 0; i < parentThread.log.size(); i++){
-				System.out.println(parentThread.log.get(i));
-				//socketOut.println(parentThread.log.get(i));
-				readMsg += i + " " + parentThread.log.get(i) + ",";
+			if(parentThread.log.size() == 0){
+				readMsg = "Log empty!";
+			}
+			else{
+				for(int i = 0; i < parentThread.log.size(); i++){
+					System.out.println(parentThread.log.get(i));
+					//socketOut.println(parentThread.log.get(i));
+					readMsg += i + " " + parentThread.log.get(i) + ",";
+				}
 			}
 		}
 		System.out.println("Sending Read msg as: " + readMsg);
